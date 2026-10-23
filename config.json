@@ -1,0 +1,10 @@
+{
+  "tokens": [
+    {"symbol": "XAUT", "name": "Tether Gold",      "coingecko_id": "tether-gold",     "defillama_name": "Tether Gold"},
+    {"symbol": "PAXG", "name": "PAX Gold",         "coingecko_id": "pax-gold",        "defillama_name": "Paxos Gold"},
+    {"symbol": "XAUm", "name": "Matrixdock Gold",  "coingecko_id": "matrixdock-gold", "defillama_name": "Matrixdock Gold"},
+    {"symbol": "KAU",  "name": "Kinesis Gold",     "coingecko_id": "kinesis-gold",    "defillama_name": "Kinesis Money"}
+  ],
+  "history_days": 365,
+  "spread_pair": ["XAUT", "PAXG"]
+}
