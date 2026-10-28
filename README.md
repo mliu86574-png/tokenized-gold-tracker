@@ -4,7 +4,7 @@ A small, automated tracker of gold-backed tokens using only public data. Every d
 
 > 中文简介：一个每天自动更新的代币化黄金追踪看板，只使用公开数据（CoinGecko、DefiLlama）。追踪 XAU₮、PAXG、XAUm、KAU 等黄金代币的市值、市场份额、成交量、各链分布，以及 XAU₮ 与 PAXG 之间的价差。
 
-**Live dashboard:** `https://<your-username>.github.io/tokenized-gold-tracker/` (available after the setup steps below)
+**Live dashboard:** `https://mliu86574-png.github.io/tokenized-gold-tracker/` (available after the setup steps below)
 
 ## Why this exists
 
