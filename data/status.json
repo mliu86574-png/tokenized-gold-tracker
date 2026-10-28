@@ -1,0 +1,335 @@
+{
+  "updated": "2026-10-28 04:28",
+  "sources": [
+    {
+      "source": "CoinGecko",
+      "item": "markets",
+      "ok": true,
+      "last": null
+    },
+    {
+      "source": "CoinGecko",
+      "item": "history",
+      "ok": true,
+      "last": "2026-10-28"
+    },
+    {
+      "source": "DefiLlama",
+      "item": "protocols",
+      "ok": true,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "GC=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "SI=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "PL=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "PA=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "HG=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "CL=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DCOILWTICO",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "BZ=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DCOILBRENTEU",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "NG=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DHHNGSP",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "ZW=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "ZC=F",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "^SPGSCI",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "DX-Y.NYB",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "EURUSD=X",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DEXUSEU",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "JPY=X",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DEXJPUS",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "GBPUSD=X",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DEXUSUK",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "AUDUSD=X",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DEXUSAL",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "CHF=X",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DEXSZUS",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "CNY=X",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DEXCHUS",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "HKD=X",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "DEXHKUS",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "^GSPC",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED (fallback)",
+      "item": "SP500",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "Yahoo Finance",
+      "item": "BTC-USD",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "DFII10",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "DGS10",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "DGS2",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "T10YIE",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "T10Y2Y",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "DFEDTARU",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "SOFR",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "DTWEXBGS",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "VIXCLS",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "BAMLH0A0HYM2",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "WALCL",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "CPIAUCSL",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "CPILFESL",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "PCEPILFE",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "UNRATE",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "FRED",
+      "item": "PAYEMS",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "CFTC",
+      "item": "COT Gold",
+      "ok": true,
+      "last": "2026-10-20"
+    },
+    {
+      "source": "CFTC",
+      "item": "COT Silver",
+      "ok": true,
+      "last": "2026-10-20"
+    },
+    {
+      "source": "CFTC",
+      "item": "COT Copper",
+      "ok": true,
+      "last": "2026-10-20"
+    },
+    {
+      "source": "CoinGecko (fallback)",
+      "item": "gold price via XAUT",
+      "ok": true,
+      "last": "2026-10-28"
+    }
+  ]
+}

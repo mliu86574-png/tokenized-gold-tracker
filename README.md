@@ -9,7 +9,30 @@ A daily, fully automated dashboard that puts gold in its macro context: a transp
 ## Latest reading
 
 <!-- SNAPSHOT:START -->
-_No data yet. The first scheduled or manual run of the workflow fills this section._
+**Gold scorecard: Neutral (+0 from 4 factors).** Gold last 4,033.03 USD/oz, -5.34% over one month.
+
+![Scorecard](docs/img/scorecard.png)
+
+| Factor | Signal |
+|---|---|
+| US real yields | n/a |
+| US dollar | n/a |
+| Fed policy expectations | n/a |
+| Inflation expectations | n/a |
+| Risk appetite | n/a |
+| Price trend | ▼ headwind |
+| Short-term stretch | ● neutral |
+| Futures positioning | ● neutral |
+| Tokenized gold demand | ▲ supportive |
+
+| Token | Market cap | Share | Price (USD) | 24h volume | 30d price change |
+|---|---:|---:|---:|---:|---:|
+| XAUT (Tether Gold) | $3.26bn | 59.4% | 4,033.14 | $206.27m | -3.99% |
+| PAXG (PAX Gold) | $1.80bn | 32.8% | 4,041.80 | $99.75m | -3.74% |
+| KAU (Kinesis Gold) | $358.46m | 6.5% | 130.89 | $0.14m | -2.96% |
+| XAUm (Matrixdock Gold) | $70.12m | 1.3% | 4,039.46 | $0.61m | -3.72% |
+
+_Last updated 2026-10-28 04:28 (UTC). Source: CoinGecko, DefiLlama._
 <!-- SNAPSHOT:END -->
 
 ## What the page shows

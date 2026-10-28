@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-28 04:28",
+  "score": 0,
+  "factors_used": 4,
+  "stance": "neutral",
+  "factors": [
+    {
+      "key": "real_yield",
+      "signal": null,
+      "reading": null,
+      "asof": null
+    },
+    {
+      "key": "usd",
+      "signal": null,
+      "reading": null,
+      "asof": null
+    },
+    {
+      "key": "policy",
+      "signal": null,
+      "reading": null,
+      "asof": null
+    },
+    {
+      "key": "inflation",
+      "signal": null,
+      "reading": null,
+      "asof": null
+    },
+    {
+      "key": "risk",
+      "signal": null,
+      "reading": null,
+      "asof": null
+    },
+    {
+      "key": "trend",
+      "signal": -1.0,
+      "reading": -6.786871165874276,
+      "asof": "2026-10-28"
+    },
+    {
+      "key": "stretch",
+      "signal": 0.0,
+      "reading": 37.23271942517365,
+      "asof": "2026-10-28"
+    },
+    {
+      "key": "positioning",
+      "signal": 0.0,
+      "reading": 32.69230769230769,
+      "asof": "2026-10-28"
+    },
+    {
+      "key": "onchain",
+      "signal": 1.0,
+      "reading": 18.666435365187304,
+      "asof": "2026-10-28"
+    }
+  ]
+}
