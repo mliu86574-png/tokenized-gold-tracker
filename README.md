@@ -29,7 +29,14 @@ Tokens are listed in [`config.json`](config.json) and can be changed without tou
 ## Latest snapshot
 
 <!-- SNAPSHOT:START -->
-_No data yet. The first scheduled or manual run of the workflow fills this table._
+| Token | Market cap | Share | Price (USD) | 24h volume | 30d price change |
+|---|---:|---:|---:|---:|---:|
+| XAUT (Tether Gold) | $3.27bn | 59.4% | 4,035.89 | $207.12m | -4.27% |
+| PAXG (PAX Gold) | $1.80bn | 32.8% | 4,044.30 | $100.10m | -4.02% |
+| KAU (Kinesis Gold) | $358.61m | 6.5% | 130.94 | $0.14m | -3.35% |
+| XAUm (Matrixdock Gold) | $70.19m | 1.3% | 4,043.29 | $0.60m | -3.87% |
+
+_Last updated 2026-10-28 03:39 (UTC). Source: CoinGecko, DefiLlama._
 <!-- SNAPSHOT:END -->
 
 ## How it works

@@ -1,5 +1,26 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tokenized Gold Tracker</title>
-<style>body{margin:0;background:#fbfaf7;color:#1d2433;font:15px/1.55 -apple-system,Segoe UI,Roboto,sans-serif}main{max-width:720px;margin:0 auto;padding:48px 16px}@media (prefers-color-scheme:dark){body{background:#14171c;color:#e8e6e1}}</style>
-</head><body><main><h1>Tokenized Gold Tracker</h1><p>The dashboard will appear here after the first run of the daily data workflow.</p></main></body></html>
+<style>
+:root{--bg:#fbfaf7;--fg:#1d2433;--muted:#667085;--card:#fff;--line:#e6e2d8;--accent:#b8860b}
+@media (prefers-color-scheme:dark){:root{--bg:#14171c;--fg:#e8e6e1;--muted:#9aa1ad;--card:#1c2027;--line:#2c313a;--accent:#d4a63a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:960px;margin:0 auto;padding:32px 16px 64px}h1{margin:0 0 4px;font-size:28px}
+.sub{color:var(--muted);margin-bottom:24px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:28px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.lbl{color:var(--muted);font-size:13px}.val{font-size:22px;font-weight:600;margin-top:4px;color:var(--accent)}
+.tbl{overflow-x:auto;margin-bottom:28px}table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:nth-child(-n+2),td:nth-child(-n+2){text-align:left}
+figure{margin:0 0 24px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}img{width:100%;height:auto;display:block}
+figcaption{color:#667085;font-size:13px;padding:4px 6px}footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+a{color:var(--accent)}
+</style></head><body><main>
+<h1>Tokenized Gold Tracker</h1>
+<div class="sub">Public market data on gold-backed tokens · updated 2026-10-28 03:39 UTC</div>
+<div class="grid"><div class="card"><div class="lbl">Tracked market cap</div><div class="val">$5.50bn</div></div><div class="card"><div class="lbl">Largest token</div><div class="val">XAUT · 59.4%</div></div><div class="card"><div class="lbl">30-day change in market cap</div><div class="val">+12.14%</div></div><div class="card"><div class="lbl">XAUT vs PAXG price spread</div><div class="val">-21 bps</div></div></div>
+<div class="tbl"><table><thead><tr><th>Token</th><th>Name</th><th>Market cap</th><th>Share</th><th>Price (USD)</th><th>24h volume</th><th>30d change</th></tr></thead>
+<tbody><tr><td>XAUT</td><td>Tether Gold</td><td>$3.27bn</td><td>59.4%</td><td>4,035.89</td><td>$207.12m</td><td>-4.27%</td></tr><tr><td>PAXG</td><td>PAX Gold</td><td>$1.80bn</td><td>32.8%</td><td>4,044.30</td><td>$100.10m</td><td>-4.02%</td></tr><tr><td>KAU</td><td>Kinesis Gold</td><td>$358.61m</td><td>6.5%</td><td>130.94</td><td>$0.14m</td><td>-3.35%</td></tr><tr><td>XAUm</td><td>Matrixdock Gold</td><td>$70.19m</td><td>1.3%</td><td>4,043.29</td><td>$0.60m</td><td>-3.87%</td></tr></tbody></table></div>
+<figure><img src="img/market_cap.png" alt="Market capitalisation over time"><figcaption>Market capitalisation over time</figcaption></figure><figure><img src="img/market_share.png" alt="Market share among tracked tokens"><figcaption>Market share among tracked tokens</figcaption></figure><figure><img src="img/spread.png" alt="XAUT vs PAXG price spread"><figcaption>XAUT vs PAXG price spread</figcaption></figure>
+<footer>Data: <a href="https://www.coingecko.com">CoinGecko</a> and <a href="https://defillama.com">DefiLlama</a> public APIs, refreshed daily by GitHub Actions.
+Market share is among the tokens tracked here, not the whole market. For information only; not investment advice.</footer>
+</main></body></html>
