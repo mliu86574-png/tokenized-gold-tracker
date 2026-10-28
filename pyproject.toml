@@ -9,7 +9,7 @@ description = "Daily public-data tracker for tokenized gold"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Michelle Liu" }]
+authors = [{ name = "garlicguava" }]
 dependencies = ["pandas>=2.0", "matplotlib>=3.7"]
 
 [project.optional-dependencies]
