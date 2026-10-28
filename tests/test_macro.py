@@ -139,10 +139,29 @@ def test_build_survives_all_macro_sources_down(repo):
     res = build.build(repo, fake_markets, fake_history, fake_protocols, down, down, down,
                       today=pd.Timestamp("2026-10-28"))
     assert (repo / "docs" / "index.html").exists()
-    assert res["markets"] == {} and res["fred"] == {}
+    assert set(res["markets"]) == {"gold"} and res["fred"] == {}  # gold falls back to the XAUT price
 
 
 def test_narrative_is_bilingual():
     f = {"key": "real_yield", "reading": -12.0, "extra": None}
     en, zh = narrative.factor_reading(f, {"DFII10": 2.5})
     assert "bp" in en and "天" in zh
+
+
+def test_host_breaker_skips_after_repeated_failures(monkeypatch):
+    calls = []
+
+    def boom(*_a, **_k):
+        calls.append(1)
+        raise OSError("blocked")
+    monkeypatch.setattr(sources.urllib.request, "urlopen", boom)
+    monkeypatch.setattr(sources.time, "sleep", lambda *_: None)
+    sources._FAILS.clear()
+    for _ in range(3):
+        with pytest.raises(RuntimeError):
+            sources._get_text("https://blocked.example/a")
+    n = len(calls)
+    with pytest.raises(RuntimeError, match="skipped"):
+        sources._get_text("https://blocked.example/b")
+    assert len(calls) == n  # no further network attempts
+    sources._FAILS.clear()

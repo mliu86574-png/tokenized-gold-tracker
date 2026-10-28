@@ -83,6 +83,14 @@ def build(root: Path = ROOT,
         except Exception as err:
             _warn(f"Yahoo {m['yahoo']}: {err}")
             record("Yahoo Finance", m["yahoo"], False)
+            if m.get("fred"):  # same quote convention on FRED (daily, published with a lag)
+                try:
+                    s = get_fred(m["fred"])
+                    markets[m["key"]] = s
+                    record("FRED (fallback)", m["fred"], True, s.index[-1].date().isoformat())
+                except Exception as err2:
+                    _warn(f"FRED fallback {m['fred']}: {err2}")
+                    record("FRED (fallback)", m["fred"], False)
 
     # ------------------------------------------------ macro (FRED)
     fred: dict[str, pd.Series] = {}
@@ -112,6 +120,8 @@ def build(root: Path = ROOT,
         if not history.empty and a in set(history["symbol"]):
             h = history[history["symbol"] == a].set_index("date")["price_usd"].dropna()
             gold = pd.Series(h.values, index=pd.to_datetime(h.index))
+            markets["gold"] = gold
+            record("CoinGecko (fallback)", f"gold price via {a}", True, gold.index[-1].date().isoformat())
         else:
             gold = pd.Series(dtype="float64")
     ounces = macro.token_ounces(history)
