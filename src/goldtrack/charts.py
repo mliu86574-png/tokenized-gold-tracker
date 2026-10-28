@@ -86,3 +86,29 @@ def chain_chart(chains: pd.DataFrame, out: Path, symbol: str, top: int = 8) -> P
     fig.savefig(out)
     plt.close(fig)
     return out
+
+
+def scorecard_chart(gold: pd.Series, history: pd.DataFrame, out: Path, days: int = 730) -> Path | None:
+    """Static image for the README: daily composite score (bars) and gold price (line)."""
+    if gold is None or gold.empty or history is None or history.empty:
+        return None
+    h = history[history["n"] >= 5]["score"].dropna()
+    start = gold.index[-1] - pd.Timedelta(days=days)
+    h, g = h[h.index >= start], gold[gold.index >= start]
+    if h.empty:
+        return None
+    fig, ax = plt.subplots(figsize=(9, 3.6))
+    colours = ["#2E7D32" if v >= 3 else "#C0392B" if v <= -3 else "#A0A4AB" for v in h.values]
+    ax.bar(h.index, h.values, width=1.0, color=colours)
+    ax.set_ylim(-9, 9)
+    ax.set_ylabel("Score")
+    ax2 = ax.twinx()
+    ax2.plot(g.index, g.values, color=PALETTE[1], lw=1.8)
+    ax2.set_ylabel("Gold, USD/oz")
+    ax2.grid(False)
+    ax.set_title("Rules-based gold scorecard (bars) and gold price (line)")
+    fig.autofmt_xdate()
+    fig.tight_layout()
+    fig.savefig(out)
+    plt.close(fig)
+    return out

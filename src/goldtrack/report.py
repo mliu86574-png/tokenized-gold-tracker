@@ -56,6 +56,25 @@ def markdown_table(snapshot: pd.DataFrame, updated: str) -> str:
     return "\n".join(lines)
 
 
+def markdown_summary(sc: dict, gold_perf: dict, snapshot: pd.DataFrame, updated: str) -> str:
+    """README block: scorecard headline, factor signals and the token snapshot."""
+    from .macro import STANCE_TEXT
+    if not sc.get("factors"):
+        return markdown_table(snapshot, updated)
+    stance_en = STANCE_TEXT[sc["stance"]][0]
+    sym = {1: "▲ supportive", -1: "▼ headwind", 0: "● neutral", None: "n/a"}
+    lines = [f"**Gold scorecard: {stance_en} ({sc['score']:+d} from {sc['n']} factors).** "
+             f"Gold last {gold_perf.get('last', 0):,.2f} USD/oz, "
+             f"{_pct(gold_perf.get('m1'))} over one month.", "",
+             "![Scorecard](docs/img/scorecard.png)", "",
+             "| Factor | Signal |", "|---|---|"]
+    for f in sc["factors"]:
+        s = f.get("signal")
+        lines.append(f"| {f['en']} | {sym[None if s is None else int(s)]} |")
+    lines += ["", markdown_table(snapshot, updated)]
+    return "\n".join(lines)
+
+
 def update_readme(readme: Path, table_md: str) -> None:
     text = readme.read_text(encoding="utf-8")
     block = f"{START}\n{table_md}\n{END}"
@@ -64,52 +83,6 @@ def update_readme(readme: Path, table_md: str) -> None:
     else:
         text += "\n" + block + "\n"
     readme.write_text(text, encoding="utf-8")
-
-
-def render_html(snapshot: pd.DataFrame, k: dict, images: dict[str, str], updated: str) -> str:
-    a, b = k["pair"]
-    cards = [
-        ("Tracked market cap", _usd(k["total_mcap"], "bn")),
-        (f"Largest token", f"{k['leader'] or '–'} · {_pct(k['leader_share'], False)}"),
-        ("30-day change in market cap", _pct(k["mcap_30d_change"])),
-        (f"{a} vs {b} price spread", "–" if k["spread_bps"] is None else f"{k['spread_bps']:+.0f} bps"),
-    ]
-    card_html = "".join(f'<div class="card"><div class="lbl">{html.escape(l)}</div><div class="val">{html.escape(v)}</div></div>'
-                        for l, v in cards)
-    rows = ""
-    for _, r in snapshot.iterrows():
-        rows += (f"<tr><td>{html.escape(r['symbol'])}</td><td>{html.escape(r['name'])}</td>"
-                 f"<td>{_usd(r['market_cap_usd'])}</td><td>{_pct(r['market_share_pct'], False)}</td>"
-                 f"<td>{r['price_usd']:,.2f}</td><td>{_usd(r['volume_24h_usd'])}</td>"
-                 f"<td>{_pct(r['change_30d_pct'])}</td></tr>")
-    figs = "".join(f'<figure><img src="{src}" alt="{html.escape(alt)}"><figcaption>{html.escape(alt)}</figcaption></figure>'
-                   for alt, src in images.items())
-    return f"""<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tokenized Gold Tracker</title>
-<style>
-:root{{--bg:#fbfaf7;--fg:#1d2433;--muted:#667085;--card:#fff;--line:#e6e2d8;--accent:#b8860b}}
-@media (prefers-color-scheme:dark){{:root{{--bg:#14171c;--fg:#e8e6e1;--muted:#9aa1ad;--card:#1c2027;--line:#2c313a;--accent:#d4a63a}}}}
-*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,Segoe UI,Roboto,sans-serif}}
-main{{max-width:960px;margin:0 auto;padding:32px 16px 64px}}h1{{margin:0 0 4px;font-size:28px}}
-.sub{{color:var(--muted);margin-bottom:24px}}.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:28px}}
-.card{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}}
-.lbl{{color:var(--muted);font-size:13px}}.val{{font-size:22px;font-weight:600;margin-top:4px;color:var(--accent)}}
-.tbl{{overflow-x:auto;margin-bottom:28px}}table{{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px}}
-th,td{{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}}th:nth-child(-n+2),td:nth-child(-n+2){{text-align:left}}
-figure{{margin:0 0 24px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}}img{{width:100%;height:auto;display:block}}
-figcaption{{color:#667085;font-size:13px;padding:4px 6px}}footer{{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}}
-a{{color:var(--accent)}}
-</style></head><body><main>
-<h1>Tokenized Gold Tracker</h1>
-<div class="sub">Public market data on gold-backed tokens · updated {html.escape(updated)} UTC</div>
-<div class="grid">{card_html}</div>
-<div class="tbl"><table><thead><tr><th>Token</th><th>Name</th><th>Market cap</th><th>Share</th><th>Price (USD)</th><th>24h volume</th><th>30d change</th></tr></thead>
-<tbody>{rows}</tbody></table></div>
-{figs}
-<footer>Data: <a href="https://www.coingecko.com">CoinGecko</a> and <a href="https://defillama.com">DefiLlama</a> public APIs, refreshed daily by GitHub Actions.
-Market share is among the tokens tracked here, not the whole market. For information only; not investment advice.</footer>
-</main></body></html>"""
 
 
 def now_utc() -> str:

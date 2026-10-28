@@ -6,5 +6,66 @@
     {"symbol": "KAU",  "name": "Kinesis Gold",     "coingecko_id": "kinesis-gold",    "defillama_name": "Kinesis Money"}
   ],
   "history_days": 365,
-  "spread_pair": ["XAUT", "PAXG"]
+  "spread_pair": ["XAUT", "PAXG"],
+
+  "markets": [
+    {"key": "gold",      "yahoo": "GC=F",     "group": "metals",  "en": "Gold",            "zh": "黄金",       "unit": "USD/oz"},
+    {"key": "silver",    "yahoo": "SI=F",     "group": "metals",  "en": "Silver",          "zh": "白银",       "unit": "USD/oz"},
+    {"key": "platinum",  "yahoo": "PL=F",     "group": "metals",  "en": "Platinum",        "zh": "铂金",       "unit": "USD/oz"},
+    {"key": "palladium", "yahoo": "PA=F",     "group": "metals",  "en": "Palladium",       "zh": "钯金",       "unit": "USD/oz"},
+    {"key": "copper",    "yahoo": "HG=F",     "group": "metals",  "en": "Copper",          "zh": "铜",         "unit": "USD/lb"},
+    {"key": "wti",       "yahoo": "CL=F",     "group": "energy",  "en": "WTI crude",       "zh": "WTI 原油",   "unit": "USD/bbl"},
+    {"key": "brent",     "yahoo": "BZ=F",     "group": "energy",  "en": "Brent crude",     "zh": "布伦特原油", "unit": "USD/bbl"},
+    {"key": "natgas",    "yahoo": "NG=F",     "group": "energy",  "en": "Natural gas",     "zh": "天然气",     "unit": "USD/MMBtu"},
+    {"key": "wheat",     "yahoo": "ZW=F",     "group": "agri",    "en": "Wheat",           "zh": "小麦",       "unit": "USc/bu"},
+    {"key": "corn",      "yahoo": "ZC=F",     "group": "agri",    "en": "Corn",            "zh": "玉米",       "unit": "USc/bu"},
+    {"key": "gsci",      "yahoo": "^SPGSCI",  "group": "index",   "en": "S&P GSCI index",  "zh": "标普高盛商品指数", "unit": "index"},
+    {"key": "dxy",       "yahoo": "DX-Y.NYB", "group": "fx",      "en": "US dollar index (DXY)", "zh": "美元指数 (DXY)", "unit": "index"},
+    {"key": "eur",       "yahoo": "EURUSD=X", "group": "fx",      "en": "EUR/USD",         "zh": "欧元/美元",  "unit": "", "usd_base": false},
+    {"key": "jpy",       "yahoo": "JPY=X",    "group": "fx",      "en": "USD/JPY",         "zh": "美元/日元",  "unit": "", "usd_base": true},
+    {"key": "gbp",       "yahoo": "GBPUSD=X", "group": "fx",      "en": "GBP/USD",         "zh": "英镑/美元",  "unit": "", "usd_base": false},
+    {"key": "aud",       "yahoo": "AUDUSD=X", "group": "fx",      "en": "AUD/USD",         "zh": "澳元/美元",  "unit": "", "usd_base": false},
+    {"key": "chf",       "yahoo": "CHF=X",    "group": "fx",      "en": "USD/CHF",         "zh": "美元/瑞郎",  "unit": "", "usd_base": true},
+    {"key": "cny",       "yahoo": "CNY=X",    "group": "fx",      "en": "USD/CNY",         "zh": "美元/人民币", "unit": "", "usd_base": true},
+    {"key": "hkd",       "yahoo": "HKD=X",    "group": "fx",      "en": "USD/HKD",         "zh": "美元/港币",  "unit": "", "usd_base": true},
+    {"key": "spx",       "yahoo": "^GSPC",    "group": "cross",   "en": "S&P 500",         "zh": "标普 500",   "unit": "index"},
+    {"key": "btc",       "yahoo": "BTC-USD",  "group": "cross",   "en": "Bitcoin",         "zh": "比特币",     "unit": "USD"}
+  ],
+
+  "fred": [
+    {"id": "DFII10",       "en": "10Y real yield (TIPS)",      "zh": "10年期实际利率 (TIPS)", "kind": "level", "unit": "%"},
+    {"id": "DGS10",        "en": "10Y Treasury yield",         "zh": "10年期美债收益率",      "kind": "level", "unit": "%"},
+    {"id": "DGS2",         "en": "2Y Treasury yield",          "zh": "2年期美债收益率",       "kind": "level", "unit": "%"},
+    {"id": "T10YIE",       "en": "10Y breakeven inflation",    "zh": "10年期盈亏平衡通胀",    "kind": "level", "unit": "%"},
+    {"id": "T10Y2Y",       "en": "10Y–2Y curve",               "zh": "10年-2年期限利差",      "kind": "level", "unit": "%"},
+    {"id": "DFEDTARU",     "en": "Fed funds target (upper)",   "zh": "联邦基金目标利率上限",  "kind": "level", "unit": "%"},
+    {"id": "SOFR",         "en": "SOFR",                       "zh": "SOFR 隔夜利率",         "kind": "level", "unit": "%"},
+    {"id": "DTWEXBGS",     "en": "Broad dollar index (Fed)",   "zh": "美联储广义美元指数",    "kind": "level", "unit": "index"},
+    {"id": "VIXCLS",       "en": "VIX",                        "zh": "VIX 波动率指数",        "kind": "level", "unit": "index"},
+    {"id": "BAMLH0A0HYM2", "en": "US high-yield spread",       "zh": "美国高收益债利差",      "kind": "level", "unit": "%"},
+    {"id": "WALCL",        "en": "Fed balance sheet",          "zh": "美联储资产负债表",      "kind": "level", "unit": "USD tn", "scale": 1e-6},
+    {"id": "CPIAUCSL",     "en": "CPI inflation (YoY)",        "zh": "CPI 同比",              "kind": "yoy",   "unit": "%"},
+    {"id": "CPILFESL",     "en": "Core CPI (YoY)",             "zh": "核心 CPI 同比",         "kind": "yoy",   "unit": "%"},
+    {"id": "PCEPILFE",     "en": "Core PCE (YoY)",             "zh": "核心 PCE 同比",         "kind": "yoy",   "unit": "%"},
+    {"id": "UNRATE",       "en": "Unemployment rate",          "zh": "失业率",                "kind": "level", "unit": "%"},
+    {"id": "PAYEMS",       "en": "Nonfarm payrolls (m/m)",     "zh": "非农就业月增",          "kind": "diff",  "unit": "k"}
+  ],
+
+  "cot": [
+    {"key": "gold",   "code": "088691", "en": "Gold",   "zh": "黄金"},
+    {"key": "silver", "code": "084691", "en": "Silver", "zh": "白银"},
+    {"key": "copper", "code": "085692", "en": "Copper", "zh": "铜"}
+  ],
+
+  "fomc_decisions": [
+    {"date": "2026-12-09", "sep": true},
+    {"date": "2027-01-27", "sep": false},
+    {"date": "2027-03-17", "sep": true},
+    {"date": "2027-04-28", "sep": false},
+    {"date": "2027-06-09", "sep": true},
+    {"date": "2027-07-28", "sep": false},
+    {"date": "2027-09-15", "sep": true},
+    {"date": "2027-10-27", "sep": false},
+    {"date": "2027-12-08", "sep": true}
+  ]
 }

@@ -39,6 +39,10 @@ def fake_protocols():
             {"name": "Other", "chainTvls": {"Ethereum": 1}}]
 
 
+def _down(*_a, **_k):
+    raise RuntimeError("offline")
+
+
 @pytest.fixture
 def repo(tmp_path):
     shutil.copy(ROOT / "config.json", tmp_path / "config.json")
@@ -72,10 +76,8 @@ def test_find_protocol_missing_returns_none():
 
 
 def test_full_build_writes_outputs(repo):
-    res = build.build(repo, fake_markets, fake_history, fake_protocols)
+    res = build.build(repo, fake_markets, fake_history, fake_protocols, _down, _down, _down)
     assert (repo / "docs" / "index.html").exists()
-    for name in ["market_cap.png", "market_share.png", "spread.png", "chains_XAUT.png"]:
-        assert (repo / "docs" / "img" / name).exists(), name
     for name in ["snapshot.csv", "history.csv", "spread.csv", "chains_XAUT.csv"]:
         assert (repo / "data" / name).exists(), name
     readme = (repo / "README.md").read_text()
@@ -87,6 +89,6 @@ def test_full_build_writes_outputs(repo):
 def test_build_survives_defillama_outage(repo):
     def down():
         raise RuntimeError("outage")
-    res = build.build(repo, fake_markets, fake_history, down)
+    res = build.build(repo, fake_markets, fake_history, down, _down, _down, _down)
     assert res["chains"] == {}
     assert (repo / "docs" / "index.html").exists()

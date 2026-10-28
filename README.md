@@ -1,80 +1,85 @@
-# Tokenized Gold Tracker
+# Gold & Macro Monitor
 
-A small, automated tracker of gold-backed tokens using only public data. Every day a GitHub Actions job pulls market data, rebuilds the charts and publishes a static dashboard with GitHub Pages.
+A daily, fully automated dashboard that puts gold in its macro context: a transparent rules-based scorecard for gold, US rates and inflation, the dollar and major currencies, a commodity cross-section, futures positioning and on-chain demand for tokenized gold. Everything comes from free public data and is rebuilt every day by GitHub Actions.
 
-> 中文简介：一个每天自动更新的代币化黄金追踪看板，只使用公开数据（CoinGecko、DefiLlama）。追踪 XAU₮、PAXG、XAUm、KAU 等黄金代币的市值、市场份额、成交量、各链分布，以及 XAU₮ 与 PAXG 之间的价差。
+> 中文简介：每天自动更新的黄金宏观看板。先给出基于 9 项因子的黄金综合判断（实际利率、美元、美联储政策预期、通胀预期、风险偏好、价格趋势、超买超卖、期货持仓、链上黄金需求），再分板块展示宏观利率、美元与外汇、大宗商品、CFTC 持仓和代币化黄金（XAU₮、PAXG 等）。页面支持中英文切换，全部使用公开数据。
 
-**Live dashboard:** `https://mliu86574-png.github.io/tokenized-gold-tracker/` (available after the setup steps below)
+**Live dashboard:** https://mliu86574-png.github.io/tokenized-gold-tracker/
 
-## Why this exists
-
-Tokenized gold is one of the largest real-world-asset categories on-chain. Two questions come up whenever an exchange, lender or wallet considers adding a gold token:
-
-1. **How big and how liquid is each token?** Market cap, share and turnover show which tokens have real depth.
-2. **Do tokens that represent the same ounce trade at the same price?** XAU₮ and PAXG each represent one fine troy ounce. A persistent spread between them points to differences in liquidity, redemption access or market structure.
-
-## What it tracks
-
-| Metric | Definition | Source |
-|---|---|---|
-| Market cap, price, 24h volume | Latest values per token | CoinGecko `/coins/markets` |
-| Market share | Token market cap ÷ total of the tokens tracked here (not the whole market) | Derived |
-| Volume / market cap | 24h volume ÷ market cap, a simple turnover measure | Derived |
-| Market-cap history | Daily market cap over the past year | CoinGecko `/coins/{id}/market_chart` |
-| XAU₮–PAXG spread | (XAU₮ price ÷ PAXG price − 1) × 10,000, in basis points | Derived |
-| Chain distribution | Value by blockchain, where DefiLlama tracks the asset as a protocol | DefiLlama `/protocols` |
-
-Tokens are listed in [`config.json`](config.json) and can be changed without touching code. Note that KAU is denominated per gram, so its unit price is not comparable with the per-ounce tokens; market cap and share are still comparable.
-
-## Latest snapshot
+## Latest reading
 
 <!-- SNAPSHOT:START -->
-| Token | Market cap | Share | Price (USD) | 24h volume | 30d price change |
-|---|---:|---:|---:|---:|---:|
-| XAUT (Tether Gold) | $3.27bn | 59.4% | 4,035.89 | $207.12m | -4.27% |
-| PAXG (PAX Gold) | $1.80bn | 32.8% | 4,044.30 | $100.10m | -4.02% |
-| KAU (Kinesis Gold) | $358.61m | 6.5% | 130.94 | $0.14m | -3.35% |
-| XAUm (Matrixdock Gold) | $70.19m | 1.3% | 4,043.29 | $0.60m | -3.87% |
-
-_Last updated 2026-10-28 03:39 (UTC). Source: CoinGecko, DefiLlama._
+_No data yet. The first scheduled or manual run of the workflow fills this section._
 <!-- SNAPSHOT:END -->
+
+## What the page shows
+
+| Section | Contents | Source |
+|---|---|---|
+| Gold view | Composite score, stance, factor-by-factor readings, auto-generated summary, next FOMC decision | Derived |
+| Gold market | Price with 50/200-day averages, 52-week range, RSI, realised volatility, gold priced in EUR, GBP, JPY, CNY and HKD | Yahoo Finance |
+| Macro & rates | Nominal and real 10Y yields, 2Y, breakevens, curve, Fed funds, SOFR, CPI, core CPI, core PCE, unemployment, payrolls, Fed balance sheet, VIX, high-yield spread | FRED |
+| US dollar & FX | DXY, Fed broad dollar index, EUR, JPY, GBP, AUD, CHF, CNY, HKD against the dollar, trend labels | Yahoo Finance, FRED |
+| Commodities | Precious and base metals, energy, grains and the S&P GSCI: returns, trend, RSI, volatility; gold/silver, copper/gold and gold/oil ratios | Yahoo Finance |
+| Positioning | Managed-money net positions in gold, silver and copper futures, with 3-year percentiles | CFTC Commitments of Traders |
+| Tokenized gold | Market cap, share and turnover of XAU₮, PAXG, XAUm and KAU; implied ounces outstanding; XAU₮–PAXG spread; chain distribution | CoinGecko, DefiLlama |
+
+## The scorecard
+
+Each factor scores +1 when it is in a state that has historically supported gold, −1 when it is a headwind and 0 otherwise. A total of +3 or more reads as **constructive**, −3 or less as **cautious**, anything in between as **neutral**. Factors without data are left out rather than guessed.
+
+| Factor | Rule |
+|---|---|
+| US real yields | 10Y TIPS yield, 30-day change: ≤ −10 bp supportive, ≥ +10 bp headwind |
+| US dollar | Fed broad dollar index, 30-day change: ≤ −1% supportive, ≥ +1% headwind |
+| Fed policy expectations | 2Y Treasury yield, 30-day change: ≤ −15 bp supportive, ≥ +15 bp headwind |
+| Inflation expectations | 10Y breakeven, 30-day change: ≥ +10 bp supportive, ≤ −10 bp headwind |
+| Risk appetite | High-yield spread widening ≥ 40 bp in 30 days or VIX ≥ 25 supportive; tightening ≥ 40 bp with VIX ≤ 15 headwind |
+| Price trend | Above both 50- and 200-day averages supportive; below both headwind |
+| Short-term stretch | 14-day RSI ≤ 30 supportive; ≥ 70 headwind |
+| Futures positioning | Managed-money net long as % of open interest vs its 3-year range: ≤ 20th percentile supportive, ≥ 80th headwind |
+| Tokenized gold demand | XAU₮ + PAXG ounces outstanding (market cap ÷ price), 30-day change: ≥ +2% supportive, ≤ −2% headwind |
+
+The rules are deliberately simple so that every reading can be checked by hand. The score is a summary of conditions, not a forecast. The dashboard also charts the score's daily history against the gold price.
+
+Optional: write your own view in [`notes.md`](notes.md). If the file has content, it appears on the page as "Author's notes", clearly separated from the rules-based score.
 
 ## How it works
 
 ```
 GitHub Actions (daily 01:17 UTC)
   └─ python -m goldtrack.build
-       ├─ fetch.py      CoinGecko + DefiLlama public APIs (retries, optional API key)
-       ├─ transform.py  tidy tables: snapshot, history, spread, chain split
-       ├─ charts.py     PNG charts  -> docs/img/
-       └─ report.py     docs/index.html dashboard + README snapshot table
+       ├─ fetch.py      CoinGecko + DefiLlama (tokenized gold)
+       ├─ sources.py    Yahoo Finance chart API, FRED CSV, CFTC Socrata API
+       ├─ transform.py  token tables: snapshot, history, spread, chain split
+       ├─ macro.py      performance, technicals, FX conventions, ratios, positioning, scorecard
+       ├─ narrative.py  English and Chinese commentary filled from the numbers
+       ├─ dashboard.py  docs/index.html (interactive ECharts, EN/中文 toggle)
+       └─ report.py     README summary
   └─ commit data/, docs/, README.md
 GitHub Pages serves docs/
 ```
 
-The pipeline is tested offline with synthetic responses that mimic the API formats (`tests/test_pipeline.py`), including a DefiLlama outage case so a single failing source does not stop the daily build.
+Each source is optional. If a feed fails, the build records it in `data/status.json`, shows it under "Data status" on the page and carries on with the rest. The tests (`tests/`) run offline on synthetic data that mimics each API's format, including outage cases and the scorecard rules.
 
-## Set up your own copy
+Raw and derived data are committed daily: `data/markets.csv`, `data/macro.csv`, `data/cot_*.csv`, `data/scorecard.json`, plus the token files.
 
-1. Push this repository to GitHub.
-2. **Settings → Actions → General → Workflow permissions:** choose *Read and write permissions* so the job can commit updated data.
-3. **Settings → Pages:** deploy from branch `main`, folder `/docs`.
-4. **Actions → update-data → Run workflow** to populate the data immediately. After that it runs daily.
-5. Optional: add a free CoinGecko demo key as the repository secret `COINGECKO_API_KEY` to avoid rate limits.
-
-Run locally:
+## Run it yourself
 
 ```bash
 pip install -e ".[dev]"
 pytest
-python -m goldtrack.build
+python -m goldtrack.build      # writes docs/index.html
 ```
+
+Instruments, FRED series, COT markets and FOMC dates live in [`config.json`](config.json) and can be changed without touching code.
 
 ## Data notes
 
-- Market share is among the tokens tracked here only.
-- CoinGecko daily data is the last observation of each UTC day.
-- Chain distribution appears only for tokens that DefiLlama tracks as a protocol under the name given in `config.json`.
+- Futures are continuous front-month contracts from Yahoo Finance; contract rolls can cause small jumps.
+- FX changes are shown as each currency's move against the US dollar, so a positive number always means the currency strengthened.
+- FRED series are published with a lag of one day (markets) to several weeks (monthly releases); the as-of date is shown next to every figure.
+- KAU is priced per gram, so its unit price is not comparable with the per-ounce tokens; market cap and share are.
 - For information only. Not investment advice.
 
 ## License
