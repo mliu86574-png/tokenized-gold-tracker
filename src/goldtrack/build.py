@@ -77,6 +77,7 @@ def build(root: Path = ROOT,
 
     # ------------------------------------------------ markets: Yahoo -> other public feed -> FRED
     markets: dict[str, pd.Series] = {}
+    proxies: dict[str, str] = {}  # market key -> ETF used as a stand-in for the futures price
     for m in cfg.get("markets", []):
         errors = []
         try:
@@ -89,6 +90,8 @@ def build(root: Path = ROOT,
         try:
             s, label = get_alt(m)
             markets[m["key"]] = s
+            if label.startswith(official.PROXY_PREFIX):
+                proxies[m["key"]] = label.split()[2]
             record(label, m["yahoo"], True, s.index[-1].date().isoformat())
             continue
         except Exception as err:
@@ -103,6 +106,19 @@ def build(root: Path = ROOT,
                 errors.append(f"FRED {m['fred']}: {err}")
         _warn(f"{m['yahoo']}: " + " | ".join(errors))
         record("Yahoo Finance", m["yahoo"], False)
+
+    # gold is central to the page: put a GLD proxy back on a per-ounce footing using XAU₮
+    if "gold" in proxies and not history.empty and a in set(history["symbol"]):
+        h = history[history["symbol"] == a].set_index("date")["price_usd"].dropna()
+        tok = pd.Series(h.values, index=pd.to_datetime(h.index))
+        x, y = tok.align(markets["gold"], join="inner")
+        if len(x) >= 20:
+            k = float((x / y).median())
+            markets["gold"] = markets["gold"] * k
+            etf = proxies.pop("gold")
+            for st in status:
+                if st["item"] == "GC=F":
+                    st["source"] = f"{etf} (Nasdaq) rescaled to {a} per-ounce price (x{k:.3f})"
 
     # ------------------------------------------------ macro: publishing agency first, then FRED
     fred: dict[str, pd.Series] = {}
@@ -160,10 +176,12 @@ def build(root: Path = ROOT,
     gold_perf, gold_tech = macro.performance(gold), macro.technicals(gold)
     mrows = macro.macro_rows(fred, cfg.get("fred", []))
     mrow_by_id = {r["id"]: r for r in mrows}
-    fx_rows = macro.fx_rows(markets, cfg.get("markets", []))
+    specs = [dict(m, en=f"{m['en']} ({proxies[m['key']]} ETF proxy)", zh=f"{m['zh']}（以 {proxies[m['key']]} ETF 代替）",
+                  unit="ETF price") if m["key"] in proxies else m for m in cfg.get("markets", [])]
+    fx_rows = macro.fx_rows(markets, specs)
     gic = macro.gold_in_currencies(markets)
-    cmdty = macro.commodity_rows(markets, cfg.get("markets", []))
-    rat = macro.ratios(markets)
+    cmdty = macro.commodity_rows(markets, specs)
+    rat = macro.ratios({k: v for k, v in markets.items() if k not in proxies})  # ETF levels would distort ratios
     rat_now = {}
     for name, s in rat.items():
         five = s[s.index >= s.index[-1] - pd.Timedelta(days=365 * 5)]

@@ -40,10 +40,10 @@ _Last updated 2026-10-29 02:56 (UTC). Source: CoinGecko, DefiLlama._
 | Section | Contents | Source |
 |---|---|---|
 | Gold view | Composite score, stance, factor-by-factor readings, auto-generated summary, next FOMC decision | Derived |
-| Gold market | Price with 50/200-day averages, 52-week range, RSI, realised volatility, gold priced in EUR, GBP, JPY, CNY and HKD | Yahoo Finance, fallback Nasdaq / LBMA |
+| Gold market | Price with 50/200-day averages, 52-week range, RSI, realised volatility, gold priced in EUR, GBP, JPY, CNY and HKD | Yahoo Finance, fallback GLD rescaled to the XAU₮ per-ounce price |
 | Macro & rates | Nominal and real 10Y yields, 2Y, breakevens, curve, Fed funds, SOFR, CPI, core CPI, core PCE, unemployment, payrolls, Fed balance sheet, VIX, high-yield spread | US Treasury, NY Fed, Cboe, BLS first; FRED for the rest |
 | US dollar & FX | DXY, Fed broad dollar index, EUR, JPY, GBP, AUD, CHF, CNY, HKD against the dollar, trend labels | Yahoo Finance, fallback ECB reference rates (DXY rebuilt with the ICE formula), FRED |
-| Commodities | Precious and base metals, energy, grains and the S&P GSCI: returns, trend, RSI, volatility; gold/silver, copper/gold and gold/oil ratios | Yahoo Finance, fallback Nasdaq / LBMA / FRED |
+| Commodities | Precious and base metals, energy, grains and the S&P GSCI: returns, trend, RSI, volatility; gold/silver, copper/gold and gold/oil ratios | Yahoo Finance, fallback ETF proxies via Nasdaq (marked on the page, excluded from ratios) / FRED |
 | Positioning | Managed-money net positions in gold, silver and copper futures, with 3-year percentiles | CFTC Commitments of Traders |
 | Tokenized gold | Market cap, share and turnover of XAU₮, PAXG, XAUm and KAU; implied ounces outstanding; XAU₮–PAXG spread; chain distribution | CoinGecko, DefiLlama |
 
@@ -74,7 +74,7 @@ GitHub Actions (daily 01:17 UTC)
   └─ python -m goldtrack.build
        ├─ fetch.py      CoinGecko + DefiLlama (tokenized gold)
        ├─ sources.py    Yahoo Finance chart API, FRED (API or CSV), CFTC Socrata API
-       ├─ official.py   fallbacks: Treasury, NY Fed, Cboe, BLS, ECB, Nasdaq, LBMA
+       ├─ official.py   fallbacks: Treasury, NY Fed, Cboe, BLS, ECB, ETF proxies
        ├─ transform.py  token tables: snapshot, history, spread, chain split
        ├─ macro.py      performance, technicals, FX conventions, ratios, positioning, scorecard
        ├─ narrative.py  English and Chinese commentary filled from the numbers

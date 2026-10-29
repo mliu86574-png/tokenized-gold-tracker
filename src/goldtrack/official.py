@@ -5,6 +5,7 @@ run, so e.g. the Treasury curve is fetched once and serves DGS10, DGS2, T10Y2Y a
 
 * official_series(fred_id) - the FRED series rebuilt from the agency that publishes it
 * alt_market(spec)         - a market from the config rebuilt from another public feed
+                             (ECB crosses for FX, CoinGecko for bitcoin, ETF proxies for futures)
 Both return (series, source_label) and raise when no fallback exists or all fail.
 """
 from __future__ import annotations
@@ -237,20 +238,6 @@ def nasdaq_history(symbol: str, assetclass: str) -> pd.Series:
     return parse_nasdaq(json.loads(text))
 
 
-# ---------------------------------------------------------------- LBMA benchmark prices
-LBMA = "https://prices.lbma.org.uk/json/{name}.json"
-
-
-def parse_lbma(payload: list) -> pd.Series:
-    return _series((r["d"], _num((r.get("v") or [None])[0])) for r in payload if r.get("d"))
-
-
-def lbma(name: str) -> pd.Series:
-    s = parse_lbma(json.loads(_get_text(LBMA.format(name=name), timeout=30)))
-    s = s[s > 0]
-    return s[s.index >= pd.Timestamp(_start())]
-
-
 # ---------------------------------------------------------------- CoinGecko bitcoin
 def coingecko_btc() -> pd.Series:
     from . import fetch
@@ -259,26 +246,26 @@ def coingecko_btc() -> pd.Series:
 
 
 # ---------------------------------------------------------------- dispatch for markets
-NASDAQ_SYMBOLS = {"gold": "GC:CMX", "silver": "SI:CMX", "platinum": "PL:NMX", "palladium": "PA:NMX",
-                  "copper": "HG:CMX", "wti": "CL:NMX", "brent": "BZ:NMX", "natgas": "NG:NMX",
-                  "wheat": "ZW:CBT", "corn": "ZC:CBT"}
-LBMA_NAMES = {"gold": "gold_pm", "silver": "silver", "platinum": "platinum_pm", "palladium": "palladium_pm"}
+# Nasdaq.com serves stocks, ETFs and its own indices only (no futures, no spot FX), so
+# futures fall back to the closest exchange-traded fund. Their LEVELS are ETF prices, not
+# futures prices; the build labels them as proxies and keeps them out of price ratios.
+ETF_PROXIES = {"gold": "GLD", "silver": "SLV", "platinum": "PPLT", "palladium": "PALL", "copper": "CPER",
+               "wti": "USO", "brent": "BNO", "natgas": "UNG", "wheat": "WEAT", "corn": "CORN",
+               "gsci": "GSG", "spx": "SPY"}
+PROXY_PREFIX = "ETF proxy"
 
 
 def alt_market(spec: dict) -> tuple[pd.Series, str]:
     key = spec["key"]
     tries = []
-    if key in NASDAQ_SYMBOLS:
-        tries.append((f"Nasdaq {NASDAQ_SYMBOLS[key]}", lambda: nasdaq_history(NASDAQ_SYMBOLS[key], "commodities")))
-    if key == "spx":
-        tries.append(("Nasdaq SPX", lambda: nasdaq_history("SPX", "index")))
-    if key in LBMA_NAMES:
-        tries.append((f"LBMA {LBMA_NAMES[key]}", lambda: lbma(LBMA_NAMES[key])))
     if key in ("eur", "gbp", "aud", "jpy", "chf", "cny", "hkd", "dxy"):
         label = "ECB reference rates" + (" (ICE formula)" if key == "dxy" else "")
         tries.append((label, lambda: ecb_pair(key, ecb_rates()).replace([np.inf, -np.inf], np.nan).dropna()))
     if key == "btc":
         tries.append(("CoinGecko", coingecko_btc))
+    if key in ETF_PROXIES:
+        etf = ETF_PROXIES[key]
+        tries.append((f"{PROXY_PREFIX} {etf} (Nasdaq)", lambda: nasdaq_history(etf, "etf")))
     if not tries:
         raise NoFallback(f"no fallback for {key}")
     errors = []

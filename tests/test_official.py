@@ -1,5 +1,5 @@
 """Offline tests for the fallback sources. Every payload below is SYNTHETIC and only mimics
-the shape of the Treasury, NY Fed, Cboe, BLS, ECB, Nasdaq, LBMA and FRED responses."""
+the shape of the Treasury, NY Fed, Cboe, BLS, ECB, Nasdaq and FRED responses."""
 import json
 import shutil
 from pathlib import Path
@@ -70,29 +70,23 @@ def test_ecb_crosses_and_dxy():
     assert dxy == pytest.approx(direct) and 90 < dxy < 115
 
 
-def test_nasdaq_lbma_fred_api_parsers():
+def test_nasdaq_fred_api_parsers():
     nd = official.parse_nasdaq({"data": {"tradesTable": {"rows": [
         {"date": "10/28/2026", "close": "4,012.30"}, {"date": "10/27/2026", "close": "$3,990.10"}]}}})
     assert list(nd.values) == [3990.10, 4012.30]
-    lb = official.parse_lbma([{"d": "2026-10-27", "v": [3995.5, 3000.0, 3700.0]},
-                              {"d": "2026-10-28", "v": [4005.0, 3010.0, 3710.0]}])
-    assert lb.iloc[-1] == 4005.0
     fr = sources.parse_fred_api({"observations": [{"date": "2026-10-27", "value": "."},
                                                   {"date": "2026-10-28", "value": "4.05"}]})
     assert len(fr) == 1 and fr.iloc[0] == 4.05
 
 
-def test_alt_market_tries_in_order(monkeypatch):
+def test_alt_market_etf_proxy(monkeypatch):
     s = pd.Series(np.linspace(1, 2, 30), index=pd.bdate_range(end="2026-10-28", periods=30))
-
-    def nasdaq_down(*_a):
-        raise RuntimeError("403")
-    monkeypatch.setattr(official, "nasdaq_history", nasdaq_down)
-    monkeypatch.setattr(official, "lbma", lambda name: s)
-    got, label = official.alt_market({"key": "gold"})
-    assert label == "LBMA gold_pm" and got.equals(s)
+    seen = []
+    monkeypatch.setattr(official, "nasdaq_history", lambda sym, ac: seen.append((sym, ac)) or s)
+    got, label = official.alt_market({"key": "silver"})
+    assert label.startswith(official.PROXY_PREFIX) and "SLV" in label and seen == [("SLV", "etf")]
     with pytest.raises(official.NoFallback):
-        official.alt_market({"key": "gsci"})
+        official.alt_market({"key": "nickel"})
 
 
 def test_build_records_fallback_sources(tmp_path):
@@ -107,7 +101,9 @@ def test_build_records_fallback_sources(tmp_path):
     def alt(spec):
         if spec["key"] == "gsci":
             raise official.NoFallback("none")
-        return walk, "ECB reference rates" if spec["group"] == "fx" else "Nasdaq"
+        if spec["group"] == "fx":
+            return walk, "ECB reference rates"
+        return walk, f"{official.PROXY_PREFIX} {official.ETF_PROXIES.get(spec['key'], 'X')} (Nasdaq)"
 
     def off(fid):
         if fid in ("DGS10", "DGS2", "DFII10"):
@@ -118,8 +114,44 @@ def test_build_records_fallback_sources(tmp_path):
                       today=pd.Timestamp("2026-10-28"), get_alt=alt, get_official=off)
     st = json.loads((tmp_path / "data" / "status.json").read_text())["sources"]
     by_item = {s["item"]: s for s in st}
-    assert by_item["GC=F"]["source"] == "Nasdaq" and by_item["GC=F"]["ok"]
+    assert by_item["SI=F"]["source"].startswith(official.PROXY_PREFIX) and by_item["SI=F"]["ok"]
     assert by_item["EURUSD=X"]["source"] == "ECB reference rates"
     assert by_item["DGS10"]["source"] == "US Treasury"
     assert not by_item["^SPGSCI"]["ok"] and not by_item["WALCL"]["ok"]
     assert "DGS10" in res["fred"] and "gold" in res["markets"]
+    page = (tmp_path / "docs" / "index.html").read_text()
+    assert "SLV ETF proxy" in page
+
+
+def test_gold_proxy_rescaled_to_token(tmp_path):
+    shutil.copy(ROOT / "config.json", tmp_path / "config.json")
+    (tmp_path / "README.md").write_text("# T\n<!-- SNAPSHOT:START -->\n<!-- SNAPSHOT:END -->\n")
+    idx = pd.bdate_range(end="2026-10-28", periods=400)
+    gld = pd.Series(np.linspace(300, 370, len(idx)), index=idx)
+    day_ms = 86_400_000
+    t0 = int(idx[-60].timestamp() * 1000)
+
+    def hist(coin_id, days):
+        if coin_id != "tether-gold":
+            raise RuntimeError("n/a")
+        return {"prices": [[t0 + i * day_ms, 4000.0] for i in range(60)],
+                "market_caps": [[t0 + i * day_ms, 1e9] for i in range(60)],
+                "total_volumes": [[t0 + i * day_ms, 1e7] for i in range(60)]}
+
+    def down(*_a, **_k):
+        raise RuntimeError("blocked")
+
+    def nofb(*_a):
+        raise official.NoFallback("x")
+
+    def alt(spec):
+        if spec["key"] == "gold":
+            return gld, f"{official.PROXY_PREFIX} GLD (Nasdaq)"
+        raise official.NoFallback("x")
+
+    res = build.build(tmp_path, lambda ids: [], hist, lambda: [], down, down, down,
+                      today=pd.Timestamp("2026-10-28"), get_alt=alt, get_official=nofb)
+    g = res["markets"]["gold"]
+    assert 3000 < g.iloc[-1] < 5000  # back on a per-ounce footing
+    src = next(s for s in res["status"] if s["item"] == "GC=F")["source"]
+    assert "rescaled to XAUT" in src

@@ -1,6 +1,6 @@
 """Public macro and market data sources (no API keys required).
 
-* Yahoo Finance chart API  - daily closes for futures, FX, indices
+* Yahoo Finance chart API  - daily closes for futures, FX, indices (cookie + crumb session)
 * FRED (St. Louis Fed)     - rates, inflation, labour, dollar index, credit spreads
                              (official API when FRED_API_KEY is set, else the graph CSV)
 * CFTC Public Reporting    - weekly Commitments of Traders (disaggregated, futures only)
@@ -12,13 +12,13 @@ refuse requests from cloud CI runners):
 * Cboe                     - VIX daily history
 * BLS                      - CPI, core CPI, unemployment, payrolls
 * ECB                      - euro reference rates, crossed into USD pairs and a DXY replica
-* Nasdaq.com               - futures and index history
-* LBMA                     - gold / silver / PGM benchmark prices
+* Nasdaq.com               - ETF stand-ins for futures (labelled as proxies on the page)
 * CoinGecko                - bitcoin
 """
 from __future__ import annotations
 
 import csv
+import http.cookiejar
 import io
 import json
 import os
@@ -92,16 +92,55 @@ def parse_yahoo_chart(payload: dict) -> pd.Series:
     return s
 
 
+_YAHOO: dict = {}
+
+
+def _yahoo_session():
+    """Cookie + crumb session, as Yahoo answers 429 to bare requests from cloud IPs."""
+    if "opener" not in _YAHOO:
+        jar = http.cookiejar.CookieJar()
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+        opener.addheaders = [("User-Agent", BROWSER_UA), ("Accept", "*/*"), ("Accept-Language", "en-US,en;q=0.9")]
+        crumb = None
+        for seed in ("https://fc.yahoo.com", "https://finance.yahoo.com/"):
+            try:
+                opener.open(seed, timeout=10).read()
+            except Exception:
+                pass  # fc.yahoo.com answers 404 but still sets the session cookie
+            try:
+                text = opener.open("https://query1.finance.yahoo.com/v1/test/getcrumb", timeout=10).read().decode()
+                if text and "<" not in text and len(text) < 40:
+                    crumb = text.strip()
+                    break
+            except Exception:
+                continue
+        _YAHOO["opener"], _YAHOO["crumb"] = opener, crumb
+    return _YAHOO["opener"], _YAHOO["crumb"]
+
+
 def yahoo_history(symbol: str, rng: str = "5y") -> pd.Series:
+    opener, crumb = _yahoo_session()
+    params = {"range": rng, "interval": "1d", "includePrePost": "false"}
+    if crumb:
+        params["crumb"] = crumb
     last: Exception | None = None
     for host in YAHOO_HOSTS:
-        try:
-            text = _get_text(f"{host}/v8/finance/chart/{urllib.parse.quote(symbol)}",
-                             {"range": rng, "interval": "1d", "includePrePost": "false"})
-            return parse_yahoo_chart(json.loads(text))
-        except Exception as err:
-            last = err
-    raise RuntimeError(f"Yahoo history unavailable for {symbol} ({last})") from last
+        url = f"{host}/v8/finance/chart/{urllib.parse.quote(symbol)}?{urllib.parse.urlencode(params)}"
+        if host_blocked(url):
+            last = RuntimeError(f"skipped: {_host(url)} failed {MAX_HOST_FAILS} times in a row")
+            continue
+        for attempt in range(3):
+            try:
+                with opener.open(url, timeout=15) as resp:
+                    s = parse_yahoo_chart(json.loads(resp.read().decode("utf-8")))
+                _FAILS[_host(url)] = 0
+                time.sleep(0.4)  # stay well under Yahoo's rate limit
+                return s
+            except Exception as err:
+                last = err
+                time.sleep(2.0 * (attempt + 1))
+        _FAILS[_host(url)] = _FAILS.get(_host(url), 0) + 1
+    raise RuntimeError(f"Yahoo history unavailable for {symbol} (crumb={'yes' if crumb else 'no'}; {last})") from last
 
 
 # ---------------------------------------------------------------- FRED
