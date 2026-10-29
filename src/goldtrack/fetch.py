@@ -80,7 +80,8 @@ def coingecko_category(category: str = "tokenized-gold") -> list[dict]:
 
 def coingecko_tickers(coin_id: str) -> dict:
     """Top trading pairs by volume, with bid-ask spread and +/-2% order-book depth."""
-    return _get(f"{COINGECKO}/coins/{coin_id}/tickers", {"depth": "true", "order": "volume_desc"}, _cg_headers())
+    return _get(f"{COINGECKO}/coins/{coin_id}/tickers", {"depth": "true", "order": "volume_desc"}, _cg_headers(),
+                retries=4, pause=15.0)
 
 
 def defillama_pools() -> list[dict]:
@@ -103,7 +104,7 @@ def token_extras(tokens: list[dict], category: str = "tokenized-gold") -> dict:
         out["errors"]["category"] = str(err)
     for t in tokens:
         try:
-            time.sleep(2)  # keep under CoinGecko's free-tier rate limit
+            time.sleep(8)  # keep under CoinGecko's free-tier rate limit
             out["tickers"][t["symbol"]] = coingecko_tickers(t["coingecko_id"])
         except Exception as err:
             out["errors"][f"tickers {t['symbol']}"] = str(err)

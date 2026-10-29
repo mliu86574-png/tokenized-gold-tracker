@@ -102,11 +102,19 @@ def net_issuance(oz: pd.DataFrame, price_oz: float | None) -> tuple[list[dict], 
         w, m = ago(7), ago(30)
         d7 = None if w is None else last - w
         d30 = None if m is None else last - m
-        rows.append({"symbol": sym, "oz": last, "d7_oz": d7, "d30_oz": d30,
-                     "d7_pct": None if not w else d7 / w * 100, "d30_pct": None if not m else d30 / m * 100,
+        stale = d30 is not None and d7 is not None and abs(d30) < 1e-6 and abs(d7) < 1e-6
+        if stale:  # the source has not updated circulating supply; a zero here is not "no flows"
+            d7 = d30 = None
+        jump = any(x is not None and b_ and abs(x / b_) > 0.15 for x, b_ in ((d7, w), (d30, m)))
+        rows.append({"symbol": sym, "oz": last, "d7_oz": d7, "d30_oz": d30, "stale": stale, "jump": jump,
+                     "d7_pct": None if not w or d7 is None else d7 / w * 100,
+                     "d30_pct": None if not m or d30 is None else d30 / m * 100,
                      "d7_usd": None if d7 is None or not price_oz else d7 * price_oz,
                      "d30_usd": None if d30 is None or not price_oz else d30 * price_oz})
     weekly = oz.resample("W-SUN").last().diff().iloc[1:]
+    for r_ in rows:
+        if r_["stale"] and r_["symbol"] in weekly:
+            weekly = weekly.drop(columns=r_["symbol"])
     if price_oz:
         weekly = weekly * price_oz / 1e6
     return rows, weekly.tail(26)
@@ -173,7 +181,8 @@ def defi_pools(pools: list[dict] | None, lend: list[dict] | None, symbols: list[
         rows.append({"project": p.get("project"), "chain": p.get("chain"), "symbol": p.get("symbol"),
                      "gold": "/".join(hit), "tvl": tvl, "apy": _f(p.get("apy")), "apy_base": _f(p.get("apyBase")),
                      "apy_reward": _f(p.get("apyReward")), "single": p.get("exposure") == "single",
-                     "meta": p.get("poolMeta"), "ltv": _f(l.get("ltv")),
+                     "fee_tier": p.get("poolMeta") if str(p.get("poolMeta") or "").rstrip("%").replace(".", "").isdigit() else None,
+                     "ltv": _f(l.get("ltv")),
                      "borrow_apy": _f(l.get("apyBaseBorrow")),
                      "util": borrowed / supplied * 100 if supplied and borrowed is not None else None})
     if not rows:
@@ -191,9 +200,13 @@ def defi_pools(pools: list[dict] | None, lend: list[dict] | None, symbols: list[
 
 # ---------------------------------------------------------------- risk and tracking
 def risk_table(history: pd.DataFrame, units: dict[str, str], gold: pd.Series | None, btc: pd.Series | None,
-               gold_is_independent: bool = True) -> list[dict]:
+               gold_is_independent: bool = True, btc_lag_days: int = 0) -> list[dict]:
     """Per token: 30-day realised volatility, 90-day correlation and tracking error against
-    gold, correlation with bitcoin, and price relative to the median token (bp)."""
+    gold, correlation with bitcoin, and price relative to the median token (bp).
+
+    CoinGecko stamps each daily price at 00:00 UTC, i.e. the close of the previous day, so
+    token returns are moved back one day before they are lined up with gold's daily closes
+    (and with bitcoin when its series comes from a source that stamps the close date)."""
     if history is None or history.empty:
         return []
     px = history.pivot_table(index="date", columns="symbol", values="price_usd", aggfunc="last")
@@ -204,6 +217,8 @@ def risk_table(history: pd.DataFrame, units: dict[str, str], gold: pd.Series | N
     px = px.sort_index()
     rel = px.div(px.median(axis=1), axis=0).sub(1).mul(1e4)
     r = np.log(px).diff()
+    r_close = r.copy()
+    r_close.index = r_close.index - pd.Timedelta(days=1)  # 00:00 UTC stamp -> previous day's close
     g = np.log(gold).diff() if gold is not None and len(gold) and gold_is_independent else None
     b = np.log(btc).diff() if btc is not None and len(btc) else None
     out = []
@@ -216,12 +231,13 @@ def risk_table(history: pd.DataFrame, units: dict[str, str], gold: pd.Series | N
                "rel_bps_30d": _f(rel[sym].dropna().tail(30).mean()), "corr_gold": None, "te_gold": None,
                "corr_btc": None}
         if g is not None:
-            x, y = s.tail(90).align(g.dropna(), join="inner")
+            x, y = r_close[sym].dropna().tail(90).align(g.dropna(), join="inner")
             if len(x) >= 30:
                 row["corr_gold"] = float(x.corr(y))
                 row["te_gold"] = float((x - y).std() * np.sqrt(252) * 100)
         if b is not None:
-            x, y = s.tail(90).align(b.dropna(), join="inner")
+            sb = r_close[sym] if btc_lag_days else r[sym]
+            x, y = sb.dropna().tail(90).align(b.dropna(), join="inner")
             if len(x) >= 30:
                 row["corr_btc"] = float(x.corr(y))
         out.append(row)

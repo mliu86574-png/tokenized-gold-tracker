@@ -48,6 +48,15 @@ def test_net_issuance_strips_price():
     assert r["d7_oz"] == pytest.approx(700) and r["d30_oz"] == pytest.approx(3000)
     assert r["d30_usd"] == pytest.approx(3000 * OZ)
     assert weekly["AAA"].dropna().iloc[-2] == pytest.approx(700 * OZ / 1e6)  # last bar is week to date
+    assert not r["stale"] and not r["jump"]
+
+
+def test_net_issuance_flags_stale_supply():
+    idx = pd.date_range("2026-08-01", periods=40, freq="D")
+    h = pd.DataFrame({"date": idx.date, "symbol": "AAA", "price_usd": np.linspace(3500, 4000, 40)})
+    h["market_cap_usd"] = h["price_usd"] * 5e5  # supply frozen at the source
+    rows, weekly = tk.net_issuance(tk.ounces_by_token(h, {"AAA": "oz"}), OZ)
+    assert rows[0]["stale"] and rows[0]["d30_oz"] is None and "AAA" not in weekly
 
 
 def test_venue_tables_dex_share_and_depth():
@@ -83,9 +92,10 @@ def test_risk_table_correlation_and_relative_price():
     idx = pd.date_range("2026-06-01", periods=120, freq="D")
     rng = np.random.default_rng(3)
     gold = pd.Series(OZ * np.exp(np.cumsum(rng.normal(0, 0.01, 120))), index=idx)
-    h = pd.concat([pd.DataFrame({"date": idx.date, "symbol": "AAA", "price_usd": gold.values * 1.0005,
+    stamp = (idx + pd.Timedelta(days=1)).date  # CoinGecko stamps the close at 00:00 UTC the next day
+    h = pd.concat([pd.DataFrame({"date": stamp, "symbol": "AAA", "price_usd": gold.values * 1.0005,
                                  "market_cap_usd": 1e9}),
-                   pd.DataFrame({"date": idx.date, "symbol": "GGG", "price_usd": gold.values / tk.GRAMS_PER_OZ,
+                   pd.DataFrame({"date": stamp, "symbol": "GGG", "price_usd": gold.values / tk.GRAMS_PER_OZ,
                                  "market_cap_usd": 1e8})])
     rows = {r["symbol"]: r for r in tk.risk_table(h, {"GGG": "g"}, gold, None)}
     assert rows["AAA"]["corr_gold"] == pytest.approx(1.0, abs=1e-6) and rows["AAA"]["te_gold"] < 0.01

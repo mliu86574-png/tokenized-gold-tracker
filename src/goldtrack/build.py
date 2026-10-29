@@ -192,7 +192,9 @@ def build(root: Path = ROOT,
     defi_top, defi_proj, defi_stats = tk.defi_pools(extras.get("pools"), extras.get("lend"),
                                                     cfg.get("defi_symbols", [t["symbol"] for t in tokens]))
     gold_indep = not any(s_["source"] == "CoinGecko (fallback)" for s_ in status)
-    risk = tk.risk_table(history, units, gold, markets.get("btc"), gold_indep)
+    btc_src = next((s_["source"] for s_ in status if s_["item"] == "BTC-USD" and s_["ok"]), "")
+    risk = tk.risk_table(history, units, gold, markets.get("btc"), gold_indep,
+                         btc_lag_days=0 if btc_src.startswith("CoinGecko") else 1)
     if not gold.empty:
         read, sig = macro.factor_frame(gold, fred, markets, cot.get("gold"), ounces)
     else:

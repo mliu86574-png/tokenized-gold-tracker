@@ -321,14 +321,20 @@ def render(ctx: dict) -> str:
                 + f'<div class="note">{L("Tokens in CoinGecko’s tokenized-gold category with a market cap above $1m whose price matches one ounce or one gram of gold. Price vs median compares each token’s per-ounce price with the median token, so it shows relative premium or discount without needing a spot price. HHI (concentration) " + num(ls.get("hhi"), 0) + ".", "选取 CoinGecko「代币化黄金」分类中市值超过 100 万美元、且价格与 1 盎司或 1 克黄金相符的代币。“相对中位价”为每盎司价格相对所有代币中位价的偏离，无需现货价即可看出相对溢价或折价。集中度 HHI " + num(ls.get("hhi"), 0) + "。")} {bnote}</div>')
 
     # net issuance
-    frows = [[f'<b>{html.escape(f["symbol"])}</b>', num(f["oz"], 0), chg(f.get("d7_oz"), 0), pct(f.get("d7_pct"), 2),
-              chg(f.get("d30_oz"), 0), pct(f.get("d30_pct"), 2), musd(f.get("d30_usd"))] for f in flows]
+    def _fl(f, key, fn):
+        if f.get("stale"):
+            return f'<span class="na">{L("not updated", "未更新")}</span>'
+        return fn(f.get(key))
+    frows = [[f'<b>{html.escape(f["symbol"])}</b>' + (" †" if f.get("jump") else ""), num(f["oz"], 0),
+              _fl(f, "d7_oz", lambda x: chg(x, 0)), _fl(f, "d7_pct", lambda x: pct(x, 2)),
+              _fl(f, "d30_oz", lambda x: chg(x, 0)), _fl(f, "d30_pct", lambda x: pct(x, 2)),
+              _fl(f, "d30_usd", musd)] for f in flows]
     if frows:
         tok += ('<h3>' + L("Net issuance (mint minus redeem)", "净发行（铸造减赎回）") + '</h3>'
                 + '<div class="grid2"><div>'
                 + _table([("Token", "代币"), ("Ounces", "盎司"), ("7D oz", "7天盎司"), ("7D", "7天"),
                           ("30D oz", "30天盎司"), ("30D", "30天"), ("30D USD", "30天美元")], frows)
-                + f'<div class="note">{L("Ounces outstanding = market cap ÷ price (grams converted), so price moves are stripped out and the change reflects tokens minted or redeemed. Valued at today’s per-ounce price.", "流通盎司 = 市值 ÷ 价格（克换算为盎司），剔除金价涨跌，变化即为铸造或赎回；美元金额按当前每盎司价格估算。")}</div></div>'
+                + f'<div class="note">{L("Ounces outstanding = market cap ÷ price (grams converted), so price moves are stripped out and the change reflects tokens minted or redeemed. Valued at today’s per-ounce price. ‘Not updated’ means CoinGecko has not refreshed that token’s circulating supply over the period; † marks moves above 15%, which more often reflect a supply revision by the source than same-week flows.", "流通盎司 = 市值 ÷ 价格（克换算为盎司），剔除金价涨跌，变化即为铸造或赎回；美元金额按当前每盎司价格估算。“未更新”表示 CoinGecko 在该期间未更新此代币的流通量；† 表示变动超过 15%，多为数据源修订流通量，而非当周真实流入流出。")}</div></div>'
                 + _chart("c_tokflow", "Weekly net issuance by token", "各代币每周净发行", "USD millions; the latest bar is week to date.", "百万美元；最后一根为本周至今。")
                 + '</div>')
 
@@ -352,7 +358,7 @@ def render(ctx: dict) -> str:
         split = (f'{num(p.get("apy_base"), 2)} + {num(p.get("apy_reward"), 2)}' if _ok(p.get("apy_reward")) and p.get("apy_reward")
                  else "")
         drows.append([html.escape(str(p["project"])), html.escape(str(p["chain"])), html.escape(str(p["symbol"]))
-                      + (f' <span class="muted">{html.escape(str(p["meta"]))}</span>' if p.get("meta") else ""),
+                      + (f' <span class="muted">{html.escape(str(p["fee_tier"]))}</span>' if p.get("fee_tier") else ""),
                       musd(p["tvl"], 2), (f'{num(apy, 2)}%' if _ok(apy) else "–") + (f' <span class="muted">({split})</span>' if split else ""),
                       f'{num(p["ltv"] * 100, 0)}%' if _ok(p.get("ltv")) and p.get("ltv") else "–",
                       f'{num(p.get("borrow_apy"), 2)}%' if _ok(p.get("borrow_apy")) else "–",
