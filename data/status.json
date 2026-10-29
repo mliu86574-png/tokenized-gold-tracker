@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-29 02:56",
+  "updated": "2026-10-29 03:19",
   "sources": [
     {
       "source": "CoinGecko",
@@ -20,70 +20,70 @@
       "last": null
     },
     {
-      "source": "Yahoo Finance",
+      "source": "GLD (Nasdaq) rescaled to XAUT per-ounce price (x10.859)",
       "item": "GC=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy SLV (Nasdaq)",
       "item": "SI=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy PPLT (Nasdaq)",
       "item": "PL=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy PALL (Nasdaq)",
       "item": "PA=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy CPER (Nasdaq)",
       "item": "HG=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy USO (Nasdaq)",
       "item": "CL=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy BNO (Nasdaq)",
       "item": "BZ=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy UNG (Nasdaq)",
       "item": "NG=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy WEAT (Nasdaq)",
       "item": "ZW=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy CORN (Nasdaq)",
       "item": "ZC=F",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy GSG (Nasdaq)",
       "item": "^SPGSCI",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
       "source": "ECB reference rates (ICE formula)",
@@ -134,10 +134,10 @@
       "last": "2026-10-28"
     },
     {
-      "source": "Yahoo Finance",
+      "source": "ETF proxy SPY (Nasdaq)",
       "item": "^GSPC",
-      "ok": false,
-      "last": null
+      "ok": true,
+      "last": "2026-10-28"
     },
     {
       "source": "CoinGecko",
@@ -258,12 +258,6 @@
       "item": "COT Copper",
       "ok": true,
       "last": "2026-10-20"
-    },
-    {
-      "source": "CoinGecko (fallback)",
-      "item": "gold price via XAUT",
-      "ok": true,
-      "last": "2026-10-29"
     }
   ]
 }
