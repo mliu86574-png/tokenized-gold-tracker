@@ -83,16 +83,47 @@ def build(root: Path = ROOT,
         _warn(f"token extras: {err}")
         extras = {}
     errs = extras.get("errors", {})
+    # last-good cache: a rate-limited call shows the previous reading (labelled) instead of a gap
+    cache_path = data / "token_cache.json"
+    cache = json.loads(cache_path.read_text()) if cache_path.exists() else {}
+    cached_from: dict[str, str] = {}
+    if extras:
+        day = today.date().isoformat()
+        for key in ("category", "pools", "lend"):
+            if extras.get(key) is not None:
+                if key == "category":
+                    cache[key] = {"date": day, "value": extras[key]}
+            elif cache.get(key):
+                extras[key] = cache[key]["value"]
+                cached_from[key] = cache[key]["date"]
+        cache = {k: v for k, v in cache.items() if v}
+        tick_cache = cache.setdefault("tickers", {})
+        for t in tokens:
+            sym = t["symbol"]
+            if sym in (extras.get("tickers") or {}):
+                keep = ("base", "target", "bid_ask_spread_percentage", "cost_to_move_up_usd", "cost_to_move_down_usd",
+                        "is_stale", "is_anomaly")
+                slim = [{**{k: t_.get(k) for k in keep}, "market": {"name": (t_.get("market") or {}).get("name")},
+                         "converted_volume": {"usd": (t_.get("converted_volume") or {}).get("usd")}}
+                        for t_ in (extras["tickers"][sym] or {}).get("tickers", [])]
+                tick_cache[sym] = {"date": day, "value": {"tickers": slim}}
+            elif sym in tick_cache:
+                extras.setdefault("tickers", {})[sym] = tick_cache[sym]["value"]
+                cached_from[f"tickers {sym}"] = tick_cache[sym]["date"]
+        cache_path.write_text(json.dumps(cache, separators=(",", ":")), encoding="utf-8")
     for key, src, item in [] if not extras else (("category", "CoinGecko", "category tokenized-gold"), ("pools", "DefiLlama", "yield pools"),
                            ("lend", "DefiLlama", "lend/borrow")):
         if errs.get(key):
             _warn(f"{src} {item}: {errs[key]}")
-        record(src, item, extras.get(key) is not None)
+        label = f"{src} (cached {cached_from[key]})" if key in cached_from else src
+        record(label, item, extras.get(key) is not None)
     for t in tokens if extras else []:
         sym = t["symbol"]
         if errs.get(f"tickers {sym}"):
             _warn(f"CoinGecko tickers {sym}: " + errs[f"tickers {sym}"])
-        record("CoinGecko", f"tickers {sym}", sym in (extras.get("tickers") or {}))
+        key = f"tickers {sym}"
+        label = f"CoinGecko (cached {cached_from[key]})" if key in cached_from else "CoinGecko"
+        record(label, key, sym in (extras.get("tickers") or {}))
 
     # ------------------------------------------------ markets: Yahoo -> other public feed -> FRED
     markets: dict[str, pd.Series] = {}
@@ -192,6 +223,8 @@ def build(root: Path = ROOT,
     defi_top, defi_proj, defi_stats = tk.defi_pools(extras.get("pools"), extras.get("lend"),
                                                     cfg.get("defi_symbols", [t["symbol"] for t in tokens]))
     gold_indep = not any(s_["source"] == "CoinGecko (fallback)" for s_ in status)
+    gsrc = next((s_["source"] for s_ in status if s_["item"] == "GC=F" and s_["ok"]), "")
+    gold_basis = "futures" if gsrc == "Yahoo Finance" else ("etf" if gsrc else "token")
     btc_src = next((s_["source"] for s_ in status if s_["item"] == "BTC-USD" and s_["ok"]), "")
     risk = tk.risk_table(history, units, gold, markets.get("btc"), gold_indep,
                          btc_lag_days=0 if btc_src.startswith("CoinGecko") else 1)
@@ -223,7 +256,7 @@ def build(root: Path = ROOT,
     dxy = markets.get("dxy", pd.Series(dtype="float64"))
 
     text = {
-        "gold": narrative.gold_summary(gold_perf, gold_tech, sc),
+        "gold": narrative.gold_summary(gold_perf, gold_tech, sc, gold_basis),
         "macro": narrative.macro_summary(mrow_by_id, fomc),
         "fx": narrative.fx_summary(macro.performance(dxy), macro.technicals(dxy), fx_rows, gic),
         "cmdty": narrative.commodity_summary(cmdty, rat_now),
@@ -267,8 +300,9 @@ def build(root: Path = ROOT,
                       for r in cmdty if r["group"] != "index"],
         },
         "tokens": tok_series,
-        "chains": [{"chain": c, "share": round(float(v), 2)} for c, v in
-                   zip(first_chain.get("chain", []), first_chain.get("share_pct", []))][:8],
+        "chains": ([{"chain": c, "share": round(float(v), 2)} for c, v in
+                    zip(first_chain.get("chain", []), first_chain.get("share_pct", []))][:8]
+                   or defi_stats.get("by_chain", [])),
         "tok_weekly": {"dates": [d.strftime("%Y-%m-%d") for d in weekly.index],
                        "series": [{"symbol": c, "data": [None if pd.isna(v) else round(float(v), 2) for v in weekly[c]]}
                                   for c in weekly.columns]} if not weekly.empty else {},
@@ -283,7 +317,7 @@ def build(root: Path = ROOT,
     notes_path = root / "notes.md"
     updated = report.now_utc()
     ctx = {
-        "updated": updated, "scorecard": sc, "gold_perf": gold_perf, "gold_tech": gold_tech, "fomc": fomc,
+        "updated": updated, "gold_basis": gold_basis, "scorecard": sc, "gold_perf": gold_perf, "gold_tech": gold_tech, "fomc": fomc,
         "gold_ccy": gic, "macro_rows": mrows, "fx_rows": fx_rows, "dxy_perf": macro.performance(dxy),
         "dxy_tech": macro.technicals(dxy), "cmdty_rows": cmdty, "cot_rows": cot_rows, "text": text,
         "notes": notes_path.read_text(encoding="utf-8") if notes_path.exists() else None,
@@ -292,7 +326,8 @@ def build(root: Path = ROOT,
                   "oz_m1": macro.pct_change_ago(ounces, 30) if len(ounces) else None,
                   "league": league.to_dict("records") if not league.empty else [], "league_sum": league_sum,
                   "flows": flows, "venues": venue_sum, "venue_top": venue_top, "defi": defi_top,
-                  "defi_stats": defi_stats, "risk": risk, "gold_indep": gold_indep},
+                  "defi_stats": defi_stats, "risk": risk, "gold_indep": gold_indep,
+                  "chain_basis": "supply" if not first_chain.empty else ("defi" if defi_stats.get("by_chain") else None)},
         "status": status, "payload": payload,
     }
 

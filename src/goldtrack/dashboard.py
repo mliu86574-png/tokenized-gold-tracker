@@ -46,6 +46,10 @@ def chg(x, dp=2, unit="") -> str:
     return f'<span class="{cls}">{x:+,.{dp}f}{unit}</span>'
 
 
+GOLD_HEAD = {"futures": ("Gold, COMEX front month", "黄金 COMEX 主力"),
+             "etf": ("Gold, per ounce (from GLD)", "黄金每盎司（由 GLD 换算）"),
+             "token": ("Gold, per ounce (XAU₮ price)", "黄金每盎司（XAU₮ 价格）")}
+
 TREND = {"up": ("Uptrend", "上升", "up"), "down": ("Downtrend", "下降", "down"), "mixed": ("Range", "震荡", "flat")}
 
 
@@ -141,7 +145,7 @@ def render(ctx: dict) -> str:
     hero = (f'<div class="hero"><div class="stance {sc["stance"]}"><div class="lbl">{L("Gold scorecard", "黄金综合判断")}</div>'
             f'<div class="big">{L(st_en, st_zh)}</div>'
             f'<div class="score">{L("Score", "得分")} <b>{sc["score"]:+d}</b> / {sc["n"]} {L("factors", "项因子")}</div>{gauge}</div>'
-            f'<div class="price"><div class="lbl">{L("Gold, COMEX front month", "黄金 COMEX 主力")}</div>'
+            f'<div class="price"><div class="lbl">{L(*GOLD_HEAD.get(ctx.get("gold_basis", "futures"), GOLD_HEAD["futures"]))}</div>'
             f'<div class="big">${num(gp.get("last"))}</div><div class="subv">{pct(gp.get("d1"), 2)} {L("1D", "日")} · '
             f'{pct(gp.get("m1"))} {L("1M", "月")} · {pct(gp.get("ytd"))} {L("YTD", "年内")}</div>'
             + (f'<div class="fomc">{L("Next FOMC decision", "下次 FOMC 议息")}: <b>{fomc["date"]}</b> · '
@@ -298,7 +302,11 @@ def render(ctx: dict) -> str:
                     "Market cap ÷ price for XAU₮ and PAXG; strips out the gold price effect.",
                     "XAU₮ 与 PAXG 的市值 ÷ 价格，剔除金价影响，反映真实申购赎回。")
            + _chart("c_spread", f"{a} vs {b} price spread", f"{a} 与 {b} 价差", "Basis points, daily.", "基点，日频。")
-           + _chart("c_chain", "XAU₮ distribution by chain", "XAU₮ 各链分布", "DefiLlama, where tracked.", "数据来自 DefiLlama。")
+           + (_chart("c_chain", "XAU₮ distribution by chain", "XAU₮ 各链分布", "DefiLlama, where tracked.", "数据来自 DefiLlama。")
+              if tk.get("chain_basis") == "supply" else
+              _chart("c_chain", "Gold-token DeFi TVL by chain", "黄金代币 DeFi 锁仓的链分布",
+                     "Share of TVL in DefiLlama pools holding gold tokens.", "DefiLlama 上含黄金代币的池子锁仓占比。")
+              if tk.get("chain_basis") == "defi" else "")
            + '</div>')
 
     # league table
@@ -335,7 +343,7 @@ def render(ctx: dict) -> str:
                 + _table([("Token", "代币"), ("Ounces", "盎司"), ("7D oz", "7天盎司"), ("7D", "7天"),
                           ("30D oz", "30天盎司"), ("30D", "30天"), ("30D USD", "30天美元")], frows)
                 + f'<div class="note">{L("Ounces outstanding = market cap ÷ price (grams converted), so price moves are stripped out and the change reflects tokens minted or redeemed. Valued at today’s per-ounce price. ‘Not updated’ means CoinGecko has not refreshed that token’s circulating supply over the period; † marks moves above 15%, which more often reflect a supply revision by the source than same-week flows.", "流通盎司 = 市值 ÷ 价格（克换算为盎司），剔除金价涨跌，变化即为铸造或赎回；美元金额按当前每盎司价格估算。“未更新”表示 CoinGecko 在该期间未更新此代币的流通量；† 表示变动超过 15%，多为数据源修订流通量，而非当周真实流入流出。")}</div></div>'
-                + _chart("c_tokflow", "Weekly net issuance by token", "各代币每周净发行", "USD millions; the latest bar is week to date.", "百万美元；最后一根为本周至今。")
+                + _chart("c_tokflow", "Weekly net issuance by token", "各代币每周净发行", "USD millions; the latest bar is week to date. Weeks where a token’s supply moved more than 15% are left out as likely source revisions.", "百万美元；最后一根为本周至今。单周流通量变动超过 15% 的周视为数据源修订，不予显示。")
                 + '</div>')
 
     # venues
@@ -347,7 +355,7 @@ def render(ctx: dict) -> str:
                 + _table([("Token", "代币"), ("24h volume", "24小时成交"), ("Venues", "场所数"), ("On-chain share", "链上占比"),
                           ("Largest venue", "最大场所"), ("Top-3 share", "前三占比"), ("Median spread", "中位买卖价差"),
                           ("±2% depth", "±2% 深度")], vrows)
-                + _chart("c_venues", "Largest venues by 24h volume", "24小时成交最大的交易场所",
+                + _chart("c_venues", "Largest venues by 24h volume (USD m)", "24小时成交最大的交易场所（百万美元）",
                          "Reported volume can be overstated on some exchanges; ±2% order-book depth (the USD needed to move the price 2%, summed over listed pairs) is the sturdier liquidity measure. CoinGecko, top 100 pairs per token.",
                          "部分交易所的报告成交量可能偏高；±2% 深度（让价格变动 2% 所需的美元金额，按各交易对加总）是更可靠的流动性指标。数据来自 CoinGecko，每个代币取前 100 个交易对。"))
 
@@ -358,19 +366,16 @@ def render(ctx: dict) -> str:
         split = (f'{num(p.get("apy_base"), 2)} + {num(p.get("apy_reward"), 2)}' if _ok(p.get("apy_reward")) and p.get("apy_reward")
                  else "")
         drows.append([html.escape(str(p["project"])), html.escape(str(p["chain"])), html.escape(str(p["symbol"]))
-                      + (f' <span class="muted">{html.escape(str(p["fee_tier"]))}</span>' if p.get("fee_tier") else ""),
+                      + (f' <span class="muted">{html.escape(p["fee_tier"])}</span>' if isinstance(p.get("fee_tier"), str) else ""),
                       musd(p["tvl"], 2), (f'{num(apy, 2)}%' if _ok(apy) else "–") + (f' <span class="muted">({split})</span>' if split else ""),
                       f'{num(p["ltv"] * 100, 0)}%' if _ok(p.get("ltv")) and p.get("ltv") else "–",
                       f'{num(p.get("borrow_apy"), 2)}%' if _ok(p.get("borrow_apy")) else "–",
                       f'{num(p.get("util"), 0)}%' if _ok(p.get("util")) else "–"])
     if drows:
         tok += ('<h3>' + L("DeFi usage", "DeFi 使用情况") + '</h3>'
-                + '<div class="grid2"><div>'
                 + _table([("Protocol", "协议"), ("Chain", "链"), ("Pool", "池子"), ("TVL", "锁仓"), ("APY", "年化收益"),
                           ("Max LTV", "最高抵押率"), ("Borrow APY", "借款利率"), ("Utilisation", "利用率")], drows, "left2")
-                + '</div>'
-                + _chart("c_defi", "TVL in gold-token pools by protocol", "各协议黄金代币池锁仓", "USD millions.", "百万美元。")
-                + '</div>'
+                + _chart("c_defi", "TVL in gold-token pools by protocol (USD m)", "各协议黄金代币池锁仓（百万美元）")
                 + f'<div class="note">{L("Pools on DefiLlama that contain XAU₮, XAU₮0, PAXG, XAUm or KAU, with at least $100k TVL. APY is variable, set by each protocol and partly paid in reward tokens; it carries smart-contract, liquidity and liquidation risk. Max LTV and borrow APY apply when the pool is a lending market. Information only, not a recommendation.", "DefiLlama 上包含 XAU₮、XAU₮0、PAXG、XAUm 或 KAU、锁仓不低于 10 万美元的池子。年化收益为浮动值，由各协议决定，部分以奖励代币支付，并存在智能合约、流动性和清算风险；最高抵押率与借款利率仅适用于借贷市场。仅供参考，不构成推荐。")}</div>')
 
     # risk & tracking
@@ -552,7 +557,7 @@ function draw(){
  o=base();o.yAxis=yax({name:'USD m'});var pal=[C.navy,C.gold,C.teal,C.plum,C.olive];o.series=(D.tokens||[]).map(function(tk,i){return ln(tk.symbol,tk.mcap,pal[i%pal.length],{stack:'mc',areaStyle:{opacity:.25}});});mk('c_tokmcap',o);
  o=base();o.yAxis=yax({name:'oz'});o.series=[ln({en:'Ounces',zh:'盎司'},S.token_oz,C.gold,{areaStyle:{opacity:.15}})];mk('c_tokoz',o);
  o=base();o.yAxis=yax({name:'bp'});o.series=[ln({en:'Spread',zh:'价差'},S.spread,C.navy,{markLine:{silent:true,symbol:'none',data:[{yAxis:0}],lineStyle:{color:C.grey}}})];mk('c_spread',o);
- function hbars(id,rows,unit,color){if(!rows||!rows.length)return;var o=base();o.xAxis={type:'value',axisLabel:{color:TXT},splitLine:{lineStyle:{color:GRID}},name:unit,nameTextStyle:{color:TXT}};
+ function hbars(id,rows,unit,color){if(!rows||!rows.length)return;var o=base();o.xAxis={type:'value',axisLabel:{color:TXT},splitLine:{lineStyle:{color:GRID}}};
   o.yAxis={type:'category',data:rows.map(function(r){return r.k;}),inverse:true,axisLabel:{color:TXT,width:150,overflow:'truncate'}};o.grid={left:160,right:30,top:10,bottom:30};o.legend={show:false};
   o.tooltip={trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:function(v){return (+v).toFixed(2)+' '+unit;}};
   o.series=[{type:'bar',name:unit,data:rows.map(function(r){return {value:r.v,itemStyle:{color:r.dex?C.teal:color}};})}];mk(id,o);}

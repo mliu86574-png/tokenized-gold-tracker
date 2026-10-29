@@ -62,20 +62,26 @@ def _join(items: list[str], lang: str) -> str:
     return ", ".join(items) if lang == "en" else "、".join(items)
 
 
-def gold_summary(gold_perf: dict, gold_tech: dict, sc: dict) -> tuple[str, str]:
+GOLD_LABELS = {"futures": ("Gold (COMEX front month)", "黄金（COMEX 主力合约）"),
+               "etf": ("Gold (GLD, rescaled to a per-ounce price)", "黄金（以 GLD 换算为每盎司价格）"),
+               "token": ("Gold (via the XAU₮ token price)", "黄金（以 XAU₮ 代币价格代替）")}
+
+
+def gold_summary(gold_perf: dict, gold_tech: dict, sc: dict, basis: str = "futures") -> tuple[str, str]:
+    lab_en, lab_zh = GOLD_LABELS.get(basis, GOLD_LABELS["futures"])
     st_en, st_zh = STANCE_TEXT[sc["stance"]]
     pos = [f for f in sc["factors"] if f.get("signal") == 1]
     neg = [f for f in sc["factors"] if f.get("signal") == -1]
     neu = [f for f in sc["factors"] if f.get("signal") == 0]
     last = gold_perf.get("last")
-    en = (f"Gold (COMEX front month) last closed at ${_n(last)}/oz: {_p(gold_perf.get('d1'), 2)} on the day, "
+    en = (f"{lab_en} last closed at ${_n(last)}/oz: {_p(gold_perf.get('d1'), 2)} on the day, "
           f"{_p(gold_perf.get('m1'))} over one month and {_p(gold_perf.get('ytd'))} year to date, "
           f"{_p(gold_tech.get('from_hi'))} from its 52-week high. "
           f"The rules-based scorecard sums to {sc['score']:+d} across {sc['n']} factors, which reads as "
           f"<b>{st_en.lower()}</b>. Supportive: {_join([f['en'].lower() for f in pos], 'en')}. "
           f"Headwinds: {_join([f['en'].lower() for f in neg], 'en')}. "
           f"Neutral: {_join([f['en'].lower() for f in neu], 'en')}.")
-    zh = (f"黄金（COMEX 主力合约）最新收盘 {_n(last)} 美元/盎司，日内 {_p(gold_perf.get('d1'), 2)}，"
+    zh = (f"{lab_zh}最新收盘 {_n(last)} 美元/盎司，日内 {_p(gold_perf.get('d1'), 2)}，"
           f"近一月 {_p(gold_perf.get('m1'))}，年初至今 {_p(gold_perf.get('ytd'))}，"
           f"较 52 周高点 {_p(gold_tech.get('from_hi'))}。"
           f"规则打分合计 {sc['score']:+d}（共 {sc['n']} 项因子），综合判断为<b>{st_zh}</b>。"

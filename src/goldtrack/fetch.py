@@ -75,7 +75,7 @@ def coingecko_category(category: str = "tokenized-gold") -> list[dict]:
     """Every coin CoinGecko files under a category, largest first."""
     return _get(f"{COINGECKO}/coins/markets",
                 {"vs_currency": "usd", "category": category, "order": "market_cap_desc", "per_page": 100,
-                 "price_change_percentage": "7d,30d"}, _cg_headers())
+                 "price_change_percentage": "7d,30d"}, _cg_headers(), retries=4, pause=15.0)
 
 
 def coingecko_tickers(coin_id: str) -> dict:
@@ -99,6 +99,7 @@ def token_extras(tokens: list[dict], category: str = "tokenized-gold") -> dict:
     """Fetch everything the extended tokenized-gold section needs; failures are reported, not raised."""
     out: dict = {"category": None, "tickers": {}, "pools": None, "lend": None, "errors": {}}
     try:
+        time.sleep(8)  # the price histories were just requested; give the free tier room
         out["category"] = coingecko_category(category)
     except Exception as err:
         out["errors"]["category"] = str(err)

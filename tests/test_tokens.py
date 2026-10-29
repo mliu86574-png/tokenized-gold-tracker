@@ -139,3 +139,28 @@ def test_build_renders_extended_token_section(tmp_path):
     st = {s["item"]: s["ok"] for s in json.loads((tmp_path / "data" / "status.json").read_text())["sources"]}
     assert st["category tokenized-gold"] and st["tickers XAUT"] and not st["tickers PAXG"]
     assert (tmp_path / "data" / "token_league.csv").exists() and (tmp_path / "data" / "token_flows.csv").exists()
+
+
+def test_token_cache_fills_rate_limited_calls(tmp_path):
+    shutil.copy(ROOT / "config.json", tmp_path / "config.json")
+    (tmp_path / "README.md").write_text("# T\n<!-- SNAPSHOT:START -->\n<!-- SNAPSHOT:END -->\n")
+
+    def down(*_a, **_k):
+        raise RuntimeError("blocked")
+
+    def nofb(*_a):
+        raise official.NoFallback("x")
+
+    good = {"category": cat_rows(), "tickers": {"XAUT": {"tickers": [
+        {"market": {"name": "CexA"}, "base": "XAUT", "target": "USDT", "converted_volume": {"usd": 5e7}}]}},
+        "pools": None, "lend": None, "errors": {}}
+    bad = {"category": None, "tickers": {}, "pools": None, "lend": None, "errors": {"category": "429"}}
+    args = (tmp_path, lambda ids: [], lambda *a: {}, lambda: [], down, down, down)
+    build.build(*args, today=pd.Timestamp("2026-10-28"), get_alt=nofb, get_official=nofb,
+                get_token_extras=lambda *a, **k: dict(good))
+    build.build(*args, today=pd.Timestamp("2026-10-29"), get_alt=nofb, get_official=nofb,
+                get_token_extras=lambda *a, **k: dict(bad))
+    st = {s["item"]: s for s in json.loads((tmp_path / "data" / "status.json").read_text())["sources"]}
+    assert st["category tokenized-gold"]["ok"] and "cached 2026-10-28" in st["category tokenized-gold"]["source"]
+    assert st["tickers XAUT"]["ok"] and "cached" in st["tickers XAUT"]["source"]
+    assert "Market league table" in (tmp_path / "docs" / "index.html").read_text()

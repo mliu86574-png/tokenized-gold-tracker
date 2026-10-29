@@ -111,7 +111,9 @@ def net_issuance(oz: pd.DataFrame, price_oz: float | None) -> tuple[list[dict], 
                      "d30_pct": None if not m or d30 is None else d30 / m * 100,
                      "d7_usd": None if d7 is None or not price_oz else d7 * price_oz,
                      "d30_usd": None if d30 is None or not price_oz else d30 * price_oz})
-    weekly = oz.resample("W-SUN").last().diff().iloc[1:]
+    wk = oz.resample("W-SUN").last()
+    weekly = wk.diff()
+    weekly = weekly.mask((weekly / wk.shift(1)).abs() > 0.15).iloc[1:]  # supply revisions, not flows
     for r_ in rows:
         if r_["stale"] and r_["symbol"] in weekly:
             weekly = weekly.drop(columns=r_["symbol"])
@@ -193,7 +195,9 @@ def defi_pools(pools: list[dict] | None, lend: list[dict] | None, symbols: list[
     stats = {"tvl": float(df["tvl"].sum()), "pools": int(len(df)), "protocols": int(df["project"].nunique()),
              "chains": int(df["chain"].nunique()),
              "single_apy_w": float(np.average(single["apy"], weights=single["tvl"])) if len(single) else None,
-             "collateral": int(df["ltv"].fillna(0).gt(0).sum())}
+             "collateral": int(df["ltv"].fillna(0).gt(0).sum()),
+             "by_chain": [{"chain": c, "share": round(float(v / df["tvl"].sum() * 100), 2)}
+                          for c, v in df.groupby("chain")["tvl"].sum().sort_values(ascending=False).head(8).items()]}
     top = df.sort_values("tvl", ascending=False).head(15).to_dict("records")
     return top, [{"k": k, "v": float(v)} for k, v in by_proj.head(10).items()], stats
 
