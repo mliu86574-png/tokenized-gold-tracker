@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-28 04:28",
-  "score": 0,
+  "date": "2026-10-29 02:09",
+  "score": -1,
   "factors_used": 4,
   "stance": "neutral",
   "factors": [
@@ -37,26 +37,26 @@
     {
       "key": "trend",
       "signal": -1.0,
-      "reading": -6.786871165874276,
-      "asof": "2026-10-28"
+      "reading": -6.343101597061851,
+      "asof": "2026-10-29"
     },
     {
       "key": "stretch",
       "signal": 0.0,
-      "reading": 37.23271942517365,
-      "asof": "2026-10-28"
+      "reading": 40.26009161244131,
+      "asof": "2026-10-29"
     },
     {
       "key": "positioning",
       "signal": 0.0,
       "reading": 32.69230769230769,
-      "asof": "2026-10-28"
+      "asof": "2026-10-29"
     },
     {
       "key": "onchain",
-      "signal": 1.0,
-      "reading": 18.666435365187304,
-      "asof": "2026-10-28"
+      "signal": 0.0,
+      "reading": 0.9041703107124821,
+      "asof": "2026-10-29"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-28 04:28",
+  "updated": "2026-10-29 02:09",
   "sources": [
     {
       "source": "CoinGecko",
@@ -11,7 +11,7 @@
       "source": "CoinGecko",
       "item": "history",
       "ok": true,
-      "last": "2026-10-28"
+      "last": "2026-10-29"
     },
     {
       "source": "DefiLlama",
@@ -329,7 +329,7 @@
       "source": "CoinGecko (fallback)",
       "item": "gold price via XAUT",
       "ok": true,
-      "last": "2026-10-28"
+      "last": "2026-10-29"
     }
   ]
 }
