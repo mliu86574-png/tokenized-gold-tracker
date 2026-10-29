@@ -1,14 +1,27 @@
-"""Public macro and market data sources (no API keys).
+"""Public macro and market data sources (no API keys required).
 
 * Yahoo Finance chart API  - daily closes for futures, FX, indices
 * FRED (St. Louis Fed)     - rates, inflation, labour, dollar index, credit spreads
+                             (official API when FRED_API_KEY is set, else the graph CSV)
 * CFTC Public Reporting    - weekly Commitments of Traders (disaggregated, futures only)
+
+Fallbacks, used when the primary feed is blocked (Yahoo and the FRED graph CSV often
+refuse requests from cloud CI runners):
+* US Treasury              - daily nominal and real (TIPS) par yield curves
+* New York Fed             - SOFR, effective fed funds and the target range
+* Cboe                     - VIX daily history
+* BLS                      - CPI, core CPI, unemployment, payrolls
+* ECB                      - euro reference rates, crossed into USD pairs and a DXY replica
+* Nasdaq.com               - futures and index history
+* LBMA                     - gold / silver / PGM benchmark prices
+* CoinGecko                - bitcoin
 """
 from __future__ import annotations
 
 import csv
 import io
 import json
+import os
 import time
 import urllib.parse
 import urllib.request
@@ -38,7 +51,7 @@ def host_blocked(url: str) -> bool:
 
 
 def _get_text(url: str, params: dict | None = None, retries: int = 2, pause: float = 2.0,
-              timeout: int = 15) -> str:
+              timeout: int = 15, headers: dict | None = None, data: bytes | None = None) -> str:
     if params:
         url = f"{url}?{urllib.parse.urlencode(params)}"
     host = _host(url)
@@ -47,7 +60,8 @@ def _get_text(url: str, params: dict | None = None, retries: int = 2, pause: flo
     last: Exception | None = None
     for attempt in range(retries):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA, "Accept": "*/*"})
+            req = urllib.request.Request(url, data=data,
+                                         headers=headers or {"User-Agent": BROWSER_UA, "Accept": "*/*"})
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 text = resp.read().decode("utf-8")
             _FAILS[host] = 0
@@ -57,7 +71,7 @@ def _get_text(url: str, params: dict | None = None, retries: int = 2, pause: flo
             if attempt + 1 < retries:
                 time.sleep(pause * (attempt + 1))
     _FAILS[host] = _FAILS.get(host, 0) + 1
-    raise RuntimeError(f"GET failed after {retries} attempts: {url} ({last})") from last
+    raise RuntimeError(f"GET failed after {retries} attempts: {url.split('?')[0]} ({last})") from last
 
 
 # ---------------------------------------------------------------- Yahoo
@@ -87,7 +101,7 @@ def yahoo_history(symbol: str, rng: str = "5y") -> pd.Series:
             return parse_yahoo_chart(json.loads(text))
         except Exception as err:
             last = err
-    raise RuntimeError(f"Yahoo history unavailable for {symbol}") from last
+    raise RuntimeError(f"Yahoo history unavailable for {symbol} ({last})") from last
 
 
 # ---------------------------------------------------------------- FRED
@@ -112,9 +126,24 @@ def parse_fred_csv(text: str) -> pd.Series:
     return s
 
 
+FRED_API = "https://api.stlouisfed.org/fred/series/observations"
+
+
+def parse_fred_api(payload: dict) -> pd.Series:
+    obs = [(o["date"], o["value"]) for o in payload.get("observations", []) if o.get("value") not in (None, ".", "")]
+    if not obs:
+        raise ValueError("no FRED observations")
+    return pd.Series([float(v) for _, v in obs], index=pd.to_datetime([d for d, _ in obs]), dtype="float64").sort_index()
+
+
 def fred_series(series_id: str, years: int = 6) -> pd.Series:
+    """Official FRED API when FRED_API_KEY is set (free key), otherwise the public graph CSV."""
     start = (date.today() - timedelta(days=365 * years)).isoformat()
-    return parse_fred_csv(_get_text(FRED_CSV, {"id": series_id, "cosd": start}))
+    key = os.environ.get("FRED_API_KEY")
+    if key:
+        return parse_fred_api(json.loads(_get_text(FRED_API, {
+            "series_id": series_id, "api_key": key, "file_type": "json", "observation_start": start})))
+    return parse_fred_csv(_get_text(FRED_CSV, {"id": series_id, "cosd": start}, retries=1, timeout=10))
 
 
 # ---------------------------------------------------------------- CFTC

@@ -13,7 +13,7 @@ from typing import Callable
 
 import pandas as pd
 
-from . import charts, dashboard, fetch, macro, narrative, report, sources, transform
+from . import charts, dashboard, fetch, macro, narrative, official, report, sources, transform
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -29,7 +29,9 @@ def build(root: Path = ROOT,
           get_yahoo: Callable = sources.yahoo_history,
           get_fred: Callable = sources.fred_series,
           get_cot: Callable = sources.cftc_cot,
-          today: pd.Timestamp | None = None) -> dict:
+          today: pd.Timestamp | None = None,
+          get_alt: Callable = official.alt_market,
+          get_official: Callable = official.official_series) -> dict:
     cfg = json.loads((root / "config.json").read_text())
     today = today or pd.Timestamp.now(tz="UTC").tz_localize(None)
     status: list[dict] = []
@@ -73,34 +75,55 @@ def build(root: Path = ROOT,
         _warn(f"DefiLlama unavailable: {err}")
         record("DefiLlama", "protocols", False)
 
-    # ------------------------------------------------ markets (Yahoo)
+    # ------------------------------------------------ markets: Yahoo -> other public feed -> FRED
     markets: dict[str, pd.Series] = {}
     for m in cfg.get("markets", []):
+        errors = []
         try:
             s = get_yahoo(m["yahoo"])
             markets[m["key"]] = s
             record("Yahoo Finance", m["yahoo"], True, s.index[-1].date().isoformat())
+            continue
         except Exception as err:
-            _warn(f"Yahoo {m['yahoo']}: {err}")
-            record("Yahoo Finance", m["yahoo"], False)
-            if m.get("fred"):  # same quote convention on FRED (daily, published with a lag)
-                try:
-                    s = get_fred(m["fred"])
-                    markets[m["key"]] = s
-                    record("FRED (fallback)", m["fred"], True, s.index[-1].date().isoformat())
-                except Exception as err2:
-                    _warn(f"FRED fallback {m['fred']}: {err2}")
-                    record("FRED (fallback)", m["fred"], False)
+            errors.append(f"Yahoo: {err}")
+        try:
+            s, label = get_alt(m)
+            markets[m["key"]] = s
+            record(label, m["yahoo"], True, s.index[-1].date().isoformat())
+            continue
+        except Exception as err:
+            errors.append(f"fallback: {err}")
+        if m.get("fred"):  # same quote convention on FRED (daily, published with a lag)
+            try:
+                s = get_fred(m["fred"])
+                markets[m["key"]] = s
+                record("FRED", m["yahoo"], True, s.index[-1].date().isoformat())
+                continue
+            except Exception as err:
+                errors.append(f"FRED {m['fred']}: {err}")
+        _warn(f"{m['yahoo']}: " + " | ".join(errors))
+        record("Yahoo Finance", m["yahoo"], False)
 
-    # ------------------------------------------------ macro (FRED)
+    # ------------------------------------------------ macro: publishing agency first, then FRED
     fred: dict[str, pd.Series] = {}
     for f in cfg.get("fred", []):
+        errors = []
+        try:
+            s, label = get_official(f["id"])
+            fred[f["id"]] = s
+            record(label, f["id"], True, s.index[-1].date().isoformat())
+            continue
+        except official.NoFallback:
+            pass  # FRED is the only public source for this series
+        except Exception as err:
+            errors.append(f"official: {err}")
         try:
             s = get_fred(f["id"])
             fred[f["id"]] = s
             record("FRED", f["id"], True, s.index[-1].date().isoformat())
         except Exception as err:
-            _warn(f"FRED {f['id']}: {err}")
+            errors.append(f"FRED: {err}")
+            _warn(f"{f['id']}: " + " | ".join(errors))
             record("FRED", f["id"], False)
 
     # ------------------------------------------------ positioning (CFTC)

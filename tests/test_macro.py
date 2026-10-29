@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from goldtrack import build, macro, narrative, sources
+from goldtrack import official, build, macro, narrative, sources
 from test_pipeline import fake_history, fake_markets, fake_protocols
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,6 +44,10 @@ def fake_cot(code):
     return sources.parse_cot([{"report_date_as_yyyy_mm_dd": d.strftime("%Y-%m-%dT00:00:00.000"),
                                "m_money_positions_long_all": str(l), "m_money_positions_short_all": "30000",
                                "open_interest_all": "500000"} for d, l in zip(idx, long)])
+
+
+def _nofb(*_a, **_k):
+    raise official.NoFallback("offline test")
 
 
 @pytest.fixture
@@ -118,7 +122,7 @@ def test_token_ounces_strip_price():
 
 def test_full_build_with_outages(repo):
     res = build.build(repo, fake_markets, fake_history, fake_protocols, fake_yahoo, fake_fred, fake_cot,
-                      today=pd.Timestamp("2026-10-28"))
+                      today=pd.Timestamp("2026-10-28"), get_alt=_nofb, get_official=_nofb)
     page = (repo / "docs" / "index.html").read_text()
     assert "Gold & Macro Monitor" in page and "黄金宏观看板" in page
     assert "window.DATA=" in page and "echarts@5.5.1" in page
@@ -137,7 +141,7 @@ def test_build_survives_all_macro_sources_down(repo):
     def down(*_a, **_k):
         raise RuntimeError("down")
     res = build.build(repo, fake_markets, fake_history, fake_protocols, down, down, down,
-                      today=pd.Timestamp("2026-10-28"))
+                      today=pd.Timestamp("2026-10-28"), get_alt=_nofb, get_official=_nofb)
     assert (repo / "docs" / "index.html").exists()
     assert set(res["markets"]) == {"gold"} and res["fred"] == {}  # gold falls back to the XAUT price
 

@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from goldtrack import build, fetch, transform
+from goldtrack import official, build, fetch, transform
 
 ROOT = Path(__file__).resolve().parents[1]
 DAY_MS = 86_400_000
@@ -41,6 +41,10 @@ def fake_protocols():
 
 def _down(*_a, **_k):
     raise RuntimeError("offline")
+
+
+def _nofb(*_a, **_k):
+    raise official.NoFallback("offline test")
 
 
 @pytest.fixture
@@ -76,7 +80,7 @@ def test_find_protocol_missing_returns_none():
 
 
 def test_full_build_writes_outputs(repo):
-    res = build.build(repo, fake_markets, fake_history, fake_protocols, _down, _down, _down)
+    res = build.build(repo, fake_markets, fake_history, fake_protocols, _down, _down, _down, get_alt=_nofb, get_official=_nofb)
     assert (repo / "docs" / "index.html").exists()
     for name in ["snapshot.csv", "history.csv", "spread.csv", "chains_XAUT.csv"]:
         assert (repo / "data" / name).exists(), name
@@ -89,6 +93,6 @@ def test_full_build_writes_outputs(repo):
 def test_build_survives_defillama_outage(repo):
     def down():
         raise RuntimeError("outage")
-    res = build.build(repo, fake_markets, fake_history, down, _down, _down, _down)
+    res = build.build(repo, fake_markets, fake_history, down, _down, _down, _down, get_alt=_nofb, get_official=_nofb)
     assert res["chains"] == {}
     assert (repo / "docs" / "index.html").exists()

@@ -40,10 +40,10 @@ _Last updated 2026-10-29 02:09 (UTC). Source: CoinGecko, DefiLlama._
 | Section | Contents | Source |
 |---|---|---|
 | Gold view | Composite score, stance, factor-by-factor readings, auto-generated summary, next FOMC decision | Derived |
-| Gold market | Price with 50/200-day averages, 52-week range, RSI, realised volatility, gold priced in EUR, GBP, JPY, CNY and HKD | Yahoo Finance |
-| Macro & rates | Nominal and real 10Y yields, 2Y, breakevens, curve, Fed funds, SOFR, CPI, core CPI, core PCE, unemployment, payrolls, Fed balance sheet, VIX, high-yield spread | FRED |
-| US dollar & FX | DXY, Fed broad dollar index, EUR, JPY, GBP, AUD, CHF, CNY, HKD against the dollar, trend labels | Yahoo Finance, FRED |
-| Commodities | Precious and base metals, energy, grains and the S&P GSCI: returns, trend, RSI, volatility; gold/silver, copper/gold and gold/oil ratios | Yahoo Finance |
+| Gold market | Price with 50/200-day averages, 52-week range, RSI, realised volatility, gold priced in EUR, GBP, JPY, CNY and HKD | Yahoo Finance, fallback Nasdaq / LBMA |
+| Macro & rates | Nominal and real 10Y yields, 2Y, breakevens, curve, Fed funds, SOFR, CPI, core CPI, core PCE, unemployment, payrolls, Fed balance sheet, VIX, high-yield spread | US Treasury, NY Fed, Cboe, BLS first; FRED for the rest |
+| US dollar & FX | DXY, Fed broad dollar index, EUR, JPY, GBP, AUD, CHF, CNY, HKD against the dollar, trend labels | Yahoo Finance, fallback ECB reference rates (DXY rebuilt with the ICE formula), FRED |
+| Commodities | Precious and base metals, energy, grains and the S&P GSCI: returns, trend, RSI, volatility; gold/silver, copper/gold and gold/oil ratios | Yahoo Finance, fallback Nasdaq / LBMA / FRED |
 | Positioning | Managed-money net positions in gold, silver and copper futures, with 3-year percentiles | CFTC Commitments of Traders |
 | Tokenized gold | Market cap, share and turnover of XAU₮, PAXG, XAUm and KAU; implied ounces outstanding; XAU₮–PAXG spread; chain distribution | CoinGecko, DefiLlama |
 
@@ -73,7 +73,8 @@ Optional: write your own view in [`notes.md`](notes.md). If the file has content
 GitHub Actions (daily 01:17 UTC)
   └─ python -m goldtrack.build
        ├─ fetch.py      CoinGecko + DefiLlama (tokenized gold)
-       ├─ sources.py    Yahoo Finance chart API, FRED CSV, CFTC Socrata API
+       ├─ sources.py    Yahoo Finance chart API, FRED (API or CSV), CFTC Socrata API
+       ├─ official.py   fallbacks: Treasury, NY Fed, Cboe, BLS, ECB, Nasdaq, LBMA
        ├─ transform.py  token tables: snapshot, history, spread, chain split
        ├─ macro.py      performance, technicals, FX conventions, ratios, positioning, scorecard
        ├─ narrative.py  English and Chinese commentary filled from the numbers
@@ -101,6 +102,7 @@ Instruments, FRED series, COT markets and FOMC dates live in [`config.json`](con
 
 - Futures are continuous front-month contracts from Yahoo Finance; contract rolls can cause small jumps.
 - FX changes are shown as each currency's move against the US dollar, so a positive number always means the currency strengthened.
+- Yahoo Finance and the FRED graph CSV often refuse requests from cloud CI runners, so each series falls back to the agency that publishes it; `data/status.json` records which source was used. Adding a free FRED API key as the repository secret `FRED_API_KEY` restores the series that only FRED carries (core PCE, high-yield spread, Fed balance sheet, broad dollar index).
 - FRED series are published with a lag of one day (markets) to several weeks (monthly releases); the as-of date is shown next to every figure.
 - KAU is priced per gram, so its unit price is not comparable with the per-ounce tokens; market cap and share are.
 - For information only. Not investment advice.
