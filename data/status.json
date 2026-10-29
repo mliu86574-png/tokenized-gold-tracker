@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-29 03:41",
+  "updated": "2026-10-29 03:50",
   "sources": [
     {
       "source": "CoinGecko",
@@ -22,7 +22,7 @@
     {
       "source": "CoinGecko",
       "item": "category tokenized-gold",
-      "ok": false,
+      "ok": true,
       "last": null
     },
     {
