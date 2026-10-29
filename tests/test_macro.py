@@ -122,7 +122,7 @@ def test_token_ounces_strip_price():
 
 def test_full_build_with_outages(repo):
     res = build.build(repo, fake_markets, fake_history, fake_protocols, fake_yahoo, fake_fred, fake_cot,
-                      today=pd.Timestamp("2026-10-28"), get_alt=_nofb, get_official=_nofb)
+                      today=pd.Timestamp("2026-10-28"), get_alt=_nofb, get_official=_nofb, get_token_extras=lambda *a, **k: {})
     page = (repo / "docs" / "index.html").read_text()
     assert "Gold & Macro Monitor" in page and "黄金宏观看板" in page
     assert "window.DATA=" in page and "echarts@5.5.1" in page
@@ -141,7 +141,7 @@ def test_build_survives_all_macro_sources_down(repo):
     def down(*_a, **_k):
         raise RuntimeError("down")
     res = build.build(repo, fake_markets, fake_history, fake_protocols, down, down, down,
-                      today=pd.Timestamp("2026-10-28"), get_alt=_nofb, get_official=_nofb)
+                      today=pd.Timestamp("2026-10-28"), get_alt=_nofb, get_official=_nofb, get_token_extras=lambda *a, **k: {})
     assert (repo / "docs" / "index.html").exists()
     assert set(res["markets"]) == {"gold"} and res["fred"] == {}  # gold falls back to the XAUT price
 

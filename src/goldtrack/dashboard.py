@@ -257,13 +257,38 @@ def render(ctx: dict) -> str:
               pct(r.get("change_30d_pct"))] for r in tk["snapshot"]]
     a, b = tk["pair"]
     k = tk["kpis"]
-    tok = ('<div class="grid4">'
+    ls = tk.get("league_sum") or {}
+    flows = tk.get("flows") or []
+    venues = tk.get("venues") or []
+    dstats = tk.get("defi_stats") or {}
+    net30 = [f["d30_usd"] for f in flows if f.get("d30_usd") is not None]
+    net30_oz = [f["d30_oz"] for f in flows if f.get("d30_oz") is not None]
+    vol_all = sum(v["volume"] for v in venues)
+    dex_all = sum(v["volume"] * v["dex_share"] / 100 for v in venues)
+
+    def musd(x, dp=1):
+        return "–" if not _ok(x) else f'{"-" if x < 0 else ""}${abs(x) / 1e6:,.{dp}f}m'
+
+    tok_text = ctx["text"].get("token") or ("", "")
+    tok = ((_summary(*tok_text) if tok_text[0] else "")
+           + '<div class="grid4">'
            + _card("Tracked market cap", "追踪总市值", num((k.get("total_mcap") or 0) / 1e9, 2, "$") + "bn", "")
            + _card("Largest token", "最大代币", f'{k.get("leader") or "–"}', f'{num(k.get("leader_share"), 1)}%')
            + _card("Ounces outstanding (XAU₮+PAXG)", "流通盎司（XAU₮+PAXG）",
                    num(tk.get("oz_last"), 0), f'{pct(tk.get("oz_m1"))} {L("30D", "30天")}')
            + _card(f"{a} vs {b} spread", f"{a} 与 {b} 价差",
                    "–" if k.get("spread_bps") is None else f'{k["spread_bps"]:+.0f} bp', "")
+           + _card(f"All gold tokens ({ls.get('n', '–')})", f"全部黄金代币（{ls.get('n', '–')} 个）",
+                   num((ls.get("mcap") or 0) / 1e9, 2, "$") + "bn" if ls else "–",
+                   f'≈ {num(ls.get("tonnes"), 1)} {L("tonnes", "吨")}' if ls else "")
+           + _card("Net issuance, 30D (tracked)", "30天净发行（追踪代币）",
+                   musd(sum(net30)) if net30 else "–",
+                   f'{chg(sum(net30_oz), 0)} oz' if net30_oz else "")
+           + _card("Reported 24h volume (tracked)", "24小时报告成交（追踪代币）", musd(vol_all) if vol_all else "–",
+                   f'{L("on-chain", "链上")} {num(dex_all / vol_all * 100, 0)}%' if vol_all else "")
+           + _card("DeFi pools holding gold tokens", "含黄金代币的 DeFi 池", musd(dstats.get("tvl"), 0) if dstats else "–",
+                   f'{dstats.get("pools", 0)} {L("pools", "个池")} · {dstats.get("protocols", 0)} {L("protocols", "个协议")}'
+                   if dstats else "")
            + '</div>'
            + _table([("Token", "代币"), ("Name", "名称"), ("Market cap", "市值"), ("Share", "份额"), ("Price", "价格"),
                      ("24h volume", "24小时成交"), ("30D", "30天")], trows, "left2")
@@ -275,6 +300,86 @@ def render(ctx: dict) -> str:
            + _chart("c_spread", f"{a} vs {b} price spread", f"{a} 与 {b} 价差", "Basis points, daily.", "基点，日频。")
            + _chart("c_chain", "XAU₮ distribution by chain", "XAU₮ 各链分布", "DefiLlama, where tracked.", "数据来自 DefiLlama。")
            + '</div>')
+
+    # league table
+    lrows = []
+    for r in tk.get("league") or []:
+        star = " *" if r.get("bridged") else ""
+        lrows.append([f'<b>{html.escape(r["symbol"])}</b>{star}', html.escape(str(r["name"])),
+                      L("1 oz", "1 盎司") if r["unit"] == "oz" else L("1 gram", "1 克"),
+                      num(r["mcap"] / 1e6, 1, "$") + "m",
+                      f'{num(r["share"], 1)}%' if _ok(r.get("share")) else '<span class="na">–</span>',
+                      num(r["tonnes"], 2), chg(r.get("premium_bps"), 0, " bp"), num(r["volume"] / 1e6, 2, "$") + "m",
+                      f'{num(r["turnover"], 1)}%', pct(r.get("chg30d"))])
+    if lrows:
+        bridged = ls.get("bridged") or {}
+        bnote = " ".join(f"* {html.escape(v)}" for v in bridged.values())
+        tok += ('<h3>' + L("Market league table (all gold tokens on CoinGecko)", "全市场排行（CoinGecko 全部黄金代币）") + '</h3>'
+                + _table([("Token", "代币"), ("Name", "名称"), ("Unit", "单位"), ("Market cap", "市值"), ("Share", "份额"),
+                          ("Tonnes", "吨"), ("Price vs median", "相对中位价"), ("24h volume", "24小时成交"),
+                          ("Turnover", "换手率"), ("30D", "30天")], lrows, "left2")
+                + f'<div class="note">{L("Tokens in CoinGecko’s tokenized-gold category with a market cap above $1m whose price matches one ounce or one gram of gold. Price vs median compares each token’s per-ounce price with the median token, so it shows relative premium or discount without needing a spot price. HHI (concentration) " + num(ls.get("hhi"), 0) + ".", "选取 CoinGecko「代币化黄金」分类中市值超过 100 万美元、且价格与 1 盎司或 1 克黄金相符的代币。“相对中位价”为每盎司价格相对所有代币中位价的偏离，无需现货价即可看出相对溢价或折价。集中度 HHI " + num(ls.get("hhi"), 0) + "。")} {bnote}</div>')
+
+    # net issuance
+    frows = [[f'<b>{html.escape(f["symbol"])}</b>', num(f["oz"], 0), chg(f.get("d7_oz"), 0), pct(f.get("d7_pct"), 2),
+              chg(f.get("d30_oz"), 0), pct(f.get("d30_pct"), 2), musd(f.get("d30_usd"))] for f in flows]
+    if frows:
+        tok += ('<h3>' + L("Net issuance (mint minus redeem)", "净发行（铸造减赎回）") + '</h3>'
+                + '<div class="grid2"><div>'
+                + _table([("Token", "代币"), ("Ounces", "盎司"), ("7D oz", "7天盎司"), ("7D", "7天"),
+                          ("30D oz", "30天盎司"), ("30D", "30天"), ("30D USD", "30天美元")], frows)
+                + f'<div class="note">{L("Ounces outstanding = market cap ÷ price (grams converted), so price moves are stripped out and the change reflects tokens minted or redeemed. Valued at today’s per-ounce price.", "流通盎司 = 市值 ÷ 价格（克换算为盎司），剔除金价涨跌，变化即为铸造或赎回；美元金额按当前每盎司价格估算。")}</div></div>'
+                + _chart("c_tokflow", "Weekly net issuance by token", "各代币每周净发行", "USD millions; the latest bar is week to date.", "百万美元；最后一根为本周至今。")
+                + '</div>')
+
+    # venues
+    vrows = [[f'<b>{html.escape(v["symbol"])}</b>', musd(v["volume"]), str(v["venues"]), f'{num(v["dex_share"], 1)}%',
+              f'{html.escape(v["top_venue"])} ({num(v["top_share"], 0)}%)', f'{num(v["top3_share"], 0)}%',
+              f'{num(v.get("spread_med"), 3)}%', musd(v["depth2"])] for v in venues]
+    if vrows:
+        tok += ('<h3>' + L("Liquidity and trading venues", "流动性与交易场所") + '</h3>'
+                + _table([("Token", "代币"), ("24h volume", "24小时成交"), ("Venues", "场所数"), ("On-chain share", "链上占比"),
+                          ("Largest venue", "最大场所"), ("Top-3 share", "前三占比"), ("Median spread", "中位买卖价差"),
+                          ("±2% depth", "±2% 深度")], vrows)
+                + _chart("c_venues", "Largest venues by 24h volume", "24小时成交最大的交易场所",
+                         "Reported volume can be overstated on some exchanges; ±2% order-book depth (the USD needed to move the price 2%, summed over listed pairs) is the sturdier liquidity measure. CoinGecko, top 100 pairs per token.",
+                         "部分交易所的报告成交量可能偏高；±2% 深度（让价格变动 2% 所需的美元金额，按各交易对加总）是更可靠的流动性指标。数据来自 CoinGecko，每个代币取前 100 个交易对。"))
+
+    # DeFi
+    drows = []
+    for p in tk.get("defi") or []:
+        apy = p.get("apy")
+        split = (f'{num(p.get("apy_base"), 2)} + {num(p.get("apy_reward"), 2)}' if _ok(p.get("apy_reward")) and p.get("apy_reward")
+                 else "")
+        drows.append([html.escape(str(p["project"])), html.escape(str(p["chain"])), html.escape(str(p["symbol"]))
+                      + (f' <span class="muted">{html.escape(str(p["meta"]))}</span>' if p.get("meta") else ""),
+                      musd(p["tvl"], 2), (f'{num(apy, 2)}%' if _ok(apy) else "–") + (f' <span class="muted">({split})</span>' if split else ""),
+                      f'{num(p["ltv"] * 100, 0)}%' if _ok(p.get("ltv")) and p.get("ltv") else "–",
+                      f'{num(p.get("borrow_apy"), 2)}%' if _ok(p.get("borrow_apy")) else "–",
+                      f'{num(p.get("util"), 0)}%' if _ok(p.get("util")) else "–"])
+    if drows:
+        tok += ('<h3>' + L("DeFi usage", "DeFi 使用情况") + '</h3>'
+                + '<div class="grid2"><div>'
+                + _table([("Protocol", "协议"), ("Chain", "链"), ("Pool", "池子"), ("TVL", "锁仓"), ("APY", "年化收益"),
+                          ("Max LTV", "最高抵押率"), ("Borrow APY", "借款利率"), ("Utilisation", "利用率")], drows, "left2")
+                + '</div>'
+                + _chart("c_defi", "TVL in gold-token pools by protocol", "各协议黄金代币池锁仓", "USD millions.", "百万美元。")
+                + '</div>'
+                + f'<div class="note">{L("Pools on DefiLlama that contain XAU₮, XAU₮0, PAXG, XAUm or KAU, with at least $100k TVL. APY is variable, set by each protocol and partly paid in reward tokens; it carries smart-contract, liquidity and liquidation risk. Max LTV and borrow APY apply when the pool is a lending market. Information only, not a recommendation.", "DefiLlama 上包含 XAU₮、XAU₮0、PAXG、XAUm 或 KAU、锁仓不低于 10 万美元的池子。年化收益为浮动值，由各协议决定，部分以奖励代币支付，并存在智能合约、流动性和清算风险；最高抵押率与借款利率仅适用于借贷市场。仅供参考，不构成推荐。")}</div>')
+
+    # risk & tracking
+    rrows = [[f'<b>{html.escape(r["symbol"])}</b>', f'{num(r["vol30"], 1)}%', chg(r.get("rel_bps"), 0, " bp"),
+              chg(r.get("rel_bps_30d"), 0, " bp"), num(r.get("corr_gold"), 2), f'{num(r.get("te_gold"), 1)}%'
+              if _ok(r.get("te_gold")) else "–", num(r.get("corr_btc"), 2)] for r in tk.get("risk") or []]
+    if rrows:
+        gnote = ("" if tk.get("gold_indep", True) else
+                 L(" Gold-price measures are blank today because the gold series itself fell back to a token price.",
+                   " 今日金价序列本身退回为代币价格，因此与金价相关的指标留空。"))
+        tok += ('<h3>' + L("Risk and tracking", "风险与跟踪") + '</h3>'
+                + _table([("Token", "代币"), ("Volatility 30D", "30天波动率"), ("vs median token", "相对中位代币"),
+                          ("30D average", "30天平均"), ("Correlation with gold 90D", "与金价相关性 90天"),
+                          ("Tracking error vs gold", "相对金价跟踪误差"), ("Correlation with BTC 90D", "与 BTC 相关性 90天")], rrows)
+                + f'<div class="note">{L("Annualised from daily closes. Tokens trade every day while gold futures and funds do not, so correlation and tracking error use common trading days only; part of the tracking error is timing, not slippage.", "按日收盘价年化。代币每天交易，金价每个交易日才有，相关性与跟踪误差只用共同交易日计算，其中一部分来自时点差异而非价格偏离。")}{gnote}</div>')
 
     # ---------- methodology
     frows = [[L(f["en"], f["zh"]), L(f["rule_en"], f["rule_zh"])] for f in sc["factors"]]
@@ -441,6 +546,14 @@ function draw(){
  o=base();o.yAxis=yax({name:'USD m'});var pal=[C.navy,C.gold,C.teal,C.plum,C.olive];o.series=(D.tokens||[]).map(function(tk,i){return ln(tk.symbol,tk.mcap,pal[i%pal.length],{stack:'mc',areaStyle:{opacity:.25}});});mk('c_tokmcap',o);
  o=base();o.yAxis=yax({name:'oz'});o.series=[ln({en:'Ounces',zh:'盎司'},S.token_oz,C.gold,{areaStyle:{opacity:.15}})];mk('c_tokoz',o);
  o=base();o.yAxis=yax({name:'bp'});o.series=[ln({en:'Spread',zh:'价差'},S.spread,C.navy,{markLine:{silent:true,symbol:'none',data:[{yAxis:0}],lineStyle:{color:C.grey}}})];mk('c_spread',o);
+ function hbars(id,rows,unit,color){if(!rows||!rows.length)return;var o=base();o.xAxis={type:'value',axisLabel:{color:TXT},splitLine:{lineStyle:{color:GRID}},name:unit,nameTextStyle:{color:TXT}};
+  o.yAxis={type:'category',data:rows.map(function(r){return r.k;}),inverse:true,axisLabel:{color:TXT,width:150,overflow:'truncate'}};o.grid={left:160,right:30,top:10,bottom:30};o.legend={show:false};
+  o.tooltip={trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:function(v){return (+v).toFixed(2)+' '+unit;}};
+  o.series=[{type:'bar',name:unit,data:rows.map(function(r){return {value:r.v,itemStyle:{color:r.dex?C.teal:color}};})}];mk(id,o);}
+ hbars('c_venues',D.venues,'USD m',C.navy);hbars('c_defi',D.defi_proj,'USD m',C.gold);
+ if(D.tok_weekly&&D.tok_weekly.dates){o=base();o.xAxis={type:'category',data:D.tok_weekly.dates,axisLabel:{color:TXT},axisLine:{lineStyle:{color:GRID}}};
+  o.yAxis=yax({name:'USD m',scale:false});var pl=[C.navy,C.gold,C.teal,C.plum,C.olive];
+  o.series=D.tok_weekly.series.map(function(sr,i){return {name:sr.symbol,type:'bar',stack:'net',data:sr.data,itemStyle:{color:pl[i%pl.length]}};});mk('c_tokflow',o);}
  if(D.chains&&D.chains.length){o=base();o.xAxis={type:'value',axisLabel:{color:TXT,formatter:'{value}%'},splitLine:{lineStyle:{color:GRID}}};
   o.yAxis={type:'category',data:D.chains.map(function(c){return c.chain;}),inverse:true,axisLabel:{color:TXT}};o.grid={left:90,right:24,top:10,bottom:24};o.legend={show:false};
   o.tooltip={trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:function(v){return (+v).toFixed(1)+'%';}};

@@ -45,7 +45,7 @@ _Last updated 2026-10-29 03:19 (UTC). Source: CoinGecko, DefiLlama._
 | US dollar & FX | DXY, Fed broad dollar index, EUR, JPY, GBP, AUD, CHF, CNY, HKD against the dollar, trend labels | Yahoo Finance, fallback ECB reference rates (DXY rebuilt with the ICE formula), FRED |
 | Commodities | Precious and base metals, energy, grains and the S&P GSCI: returns, trend, RSI, volatility; gold/silver, copper/gold and gold/oil ratios | Yahoo Finance, fallback ETF proxies via Nasdaq (marked on the page, excluded from ratios) / FRED |
 | Positioning | Managed-money net positions in gold, silver and copper futures, with 3-year percentiles | CFTC Commitments of Traders |
-| Tokenized gold | Market cap, share and turnover of XAU₮, PAXG, XAUm and KAU; implied ounces outstanding; XAU₮–PAXG spread; chain distribution | CoinGecko, DefiLlama |
+| Tokenized gold | Market cap, share and price per token; ounces outstanding; XAU₮–PAXG spread; chain distribution; league table of every gold token on CoinGecko (unit, tonnes, price vs median token); net issuance (mint minus redeem) over 7 and 30 days; trading venues, on-chain share, spreads and ±2% depth; DeFi pools holding gold tokens (TVL, APY, LTV); volatility, correlation and tracking error vs gold | CoinGecko, DefiLlama |
 
 ## The scorecard
 
@@ -74,6 +74,7 @@ GitHub Actions (daily 01:17 UTC)
   └─ python -m goldtrack.build
        ├─ fetch.py      CoinGecko + DefiLlama (tokenized gold)
        ├─ sources.py    Yahoo Finance chart API, FRED (API or CSV), CFTC Socrata API
+       ├─ tokens.py     tokenized-gold league table, issuance, venues, DeFi, risk
        ├─ official.py   fallbacks: Treasury, NY Fed, Cboe, BLS, ECB, ETF proxies
        ├─ transform.py  token tables: snapshot, history, spread, chain split
        ├─ macro.py      performance, technicals, FX conventions, ratios, positioning, scorecard

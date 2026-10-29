@@ -111,7 +111,7 @@ def test_build_records_fallback_sources(tmp_path):
         raise official.NoFallback(fid)
 
     res = build.build(tmp_path, lambda ids: [], lambda *a: {}, lambda: [], down, down, down,
-                      today=pd.Timestamp("2026-10-28"), get_alt=alt, get_official=off)
+                      today=pd.Timestamp("2026-10-28"), get_alt=alt, get_official=off, get_token_extras=lambda *a, **k: {})
     st = json.loads((tmp_path / "data" / "status.json").read_text())["sources"]
     by_item = {s["item"]: s for s in st}
     assert by_item["SI=F"]["source"].startswith(official.PROXY_PREFIX) and by_item["SI=F"]["ok"]
@@ -150,7 +150,7 @@ def test_gold_proxy_rescaled_to_token(tmp_path):
         raise official.NoFallback("x")
 
     res = build.build(tmp_path, lambda ids: [], hist, lambda: [], down, down, down,
-                      today=pd.Timestamp("2026-10-28"), get_alt=alt, get_official=nofb)
+                      today=pd.Timestamp("2026-10-28"), get_alt=alt, get_official=nofb, get_token_extras=lambda *a, **k: {})
     g = res["markets"]["gold"]
     assert 3000 < g.iloc[-1] < 5000  # back on a per-ounce footing
     src = next(s for s in res["status"] if s["item"] == "GC=F")["source"]

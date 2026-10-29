@@ -80,7 +80,7 @@ def test_find_protocol_missing_returns_none():
 
 
 def test_full_build_writes_outputs(repo):
-    res = build.build(repo, fake_markets, fake_history, fake_protocols, _down, _down, _down, get_alt=_nofb, get_official=_nofb)
+    res = build.build(repo, fake_markets, fake_history, fake_protocols, _down, _down, _down, get_alt=_nofb, get_official=_nofb, get_token_extras=lambda *a, **k: {})
     assert (repo / "docs" / "index.html").exists()
     for name in ["snapshot.csv", "history.csv", "spread.csv", "chains_XAUT.csv"]:
         assert (repo / "data" / name).exists(), name
@@ -93,6 +93,6 @@ def test_full_build_writes_outputs(repo):
 def test_build_survives_defillama_outage(repo):
     def down():
         raise RuntimeError("outage")
-    res = build.build(repo, fake_markets, fake_history, down, _down, _down, _down, get_alt=_nofb, get_official=_nofb)
+    res = build.build(repo, fake_markets, fake_history, down, _down, _down, _down, get_alt=_nofb, get_official=_nofb, get_token_extras=lambda *a, **k: {})
     assert res["chains"] == {}
     assert (repo / "docs" / "index.html").exists()

@@ -65,3 +65,51 @@ def find_protocol(protocols: list[dict], name: str) -> dict | None:
         if str(p.get("name", "")).strip().lower() == target:
             return p
     return None
+
+
+# ---------------------------------------------------------------- tokenized-gold extras
+DEFILLAMA_YIELDS = "https://yields.llama.fi"
+
+
+def coingecko_category(category: str = "tokenized-gold") -> list[dict]:
+    """Every coin CoinGecko files under a category, largest first."""
+    return _get(f"{COINGECKO}/coins/markets",
+                {"vs_currency": "usd", "category": category, "order": "market_cap_desc", "per_page": 100,
+                 "price_change_percentage": "7d,30d"}, _cg_headers())
+
+
+def coingecko_tickers(coin_id: str) -> dict:
+    """Top trading pairs by volume, with bid-ask spread and +/-2% order-book depth."""
+    return _get(f"{COINGECKO}/coins/{coin_id}/tickers", {"depth": "true", "order": "volume_desc"}, _cg_headers())
+
+
+def defillama_pools() -> list[dict]:
+    """All yield pools DefiLlama tracks (TVL, APY, chain, project)."""
+    return _get(f"{DEFILLAMA_YIELDS}/pools").get("data", [])
+
+
+def defillama_lend_borrow() -> list[dict]:
+    """Lending-market parameters per pool: LTV, supplied and borrowed USD, borrow APY."""
+    data = _get(f"{DEFILLAMA_YIELDS}/lendBorrow")
+    return data.get("data", data) if isinstance(data, dict) else data
+
+
+def token_extras(tokens: list[dict], category: str = "tokenized-gold") -> dict:
+    """Fetch everything the extended tokenized-gold section needs; failures are reported, not raised."""
+    out: dict = {"category": None, "tickers": {}, "pools": None, "lend": None, "errors": {}}
+    try:
+        out["category"] = coingecko_category(category)
+    except Exception as err:
+        out["errors"]["category"] = str(err)
+    for t in tokens:
+        try:
+            time.sleep(2)  # keep under CoinGecko's free-tier rate limit
+            out["tickers"][t["symbol"]] = coingecko_tickers(t["coingecko_id"])
+        except Exception as err:
+            out["errors"][f"tickers {t['symbol']}"] = str(err)
+    for key, fn in (("pools", defillama_pools), ("lend", defillama_lend_borrow)):
+        try:
+            out[key] = fn()
+        except Exception as err:
+            out["errors"][key] = str(err)
+    return out

@@ -13,7 +13,7 @@ from typing import Callable
 
 import pandas as pd
 
-from . import charts, dashboard, fetch, macro, narrative, official, report, sources, transform
+from . import charts, dashboard, fetch, macro, narrative, official, report, sources, tokens as tk, transform
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -31,7 +31,8 @@ def build(root: Path = ROOT,
           get_cot: Callable = sources.cftc_cot,
           today: pd.Timestamp | None = None,
           get_alt: Callable = official.alt_market,
-          get_official: Callable = official.official_series) -> dict:
+          get_official: Callable = official.official_series,
+          get_token_extras: Callable = fetch.token_extras) -> dict:
     cfg = json.loads((root / "config.json").read_text())
     today = today or pd.Timestamp.now(tz="UTC").tz_localize(None)
     status: list[dict] = []
@@ -74,6 +75,24 @@ def build(root: Path = ROOT,
     except Exception as err:
         _warn(f"DefiLlama unavailable: {err}")
         record("DefiLlama", "protocols", False)
+
+    # ------------------------------------------------ tokenized gold: whole category, venues, DeFi
+    try:
+        extras = get_token_extras(tokens, cfg.get("category", "tokenized-gold")) or {}
+    except Exception as err:
+        _warn(f"token extras: {err}")
+        extras = {}
+    errs = extras.get("errors", {})
+    for key, src, item in [] if not extras else (("category", "CoinGecko", "category tokenized-gold"), ("pools", "DefiLlama", "yield pools"),
+                           ("lend", "DefiLlama", "lend/borrow")):
+        if errs.get(key):
+            _warn(f"{src} {item}: {errs[key]}")
+        record(src, item, extras.get(key) is not None)
+    for t in tokens if extras else []:
+        sym = t["symbol"]
+        if errs.get(f"tickers {sym}"):
+            _warn(f"CoinGecko tickers {sym}: " + errs[f"tickers {sym}"])
+        record("CoinGecko", f"tickers {sym}", sym in (extras.get("tickers") or {}))
 
     # ------------------------------------------------ markets: Yahoo -> other public feed -> FRED
     markets: dict[str, pd.Series] = {}
@@ -164,6 +183,16 @@ def build(root: Path = ROOT,
         else:
             gold = pd.Series(dtype="float64")
     ounces = macro.token_ounces(history)
+    units = {t["symbol"]: t.get("unit", "oz") for t in tokens}
+    league, league_sum = tk.league_table(extras.get("category"), cfg.get("exclude_from_totals", {}),
+                                         cfg.get("min_mcap_usd", 1e6))
+    ref_oz = league_sum.get("ref_price") or (float(gold.iloc[-1]) if len(gold) else None)
+    flows, weekly = tk.net_issuance(tk.ounces_by_token(history, units), ref_oz)
+    venue_sum, venue_top = tk.venue_tables(extras.get("tickers") or {})
+    defi_top, defi_proj, defi_stats = tk.defi_pools(extras.get("pools"), extras.get("lend"),
+                                                    cfg.get("defi_symbols", [t["symbol"] for t in tokens]))
+    gold_indep = not any(s_["source"] == "CoinGecko (fallback)" for s_ in status)
+    risk = tk.risk_table(history, units, gold, markets.get("btc"), gold_indep)
     if not gold.empty:
         read, sig = macro.factor_frame(gold, fred, markets, cot.get("gold"), ounces)
     else:
@@ -197,6 +226,7 @@ def build(root: Path = ROOT,
         "fx": narrative.fx_summary(macro.performance(dxy), macro.technicals(dxy), fx_rows, gic),
         "cmdty": narrative.commodity_summary(cmdty, rat_now),
         "cot": narrative.cot_summary(cot_rows),
+        "token": tk.narrative(league_sum, flows, venue_sum, defi_stats),
     }
 
     # ------------------------------------------------ payload for charts
@@ -237,6 +267,14 @@ def build(root: Path = ROOT,
         "tokens": tok_series,
         "chains": [{"chain": c, "share": round(float(v), 2)} for c, v in
                    zip(first_chain.get("chain", []), first_chain.get("share_pct", []))][:8],
+        "tok_weekly": {"dates": [d.strftime("%Y-%m-%d") for d in weekly.index],
+                       "series": [{"symbol": c, "data": [None if pd.isna(v) else round(float(v), 2) for v in weekly[c]]}
+                                  for c in weekly.columns]} if not weekly.empty else {},
+        "defi_proj": defi_proj,
+        "venues": [{"k": f'{v["venue"]} · {v["symbol"]}', "v": round(v["volume"] / 1e6, 2), "dex": v["dex"]}
+                   for v in venue_top],
+        "league": [{"k": r["symbol"], "v": round(r["mcap"] / 1e6, 1)} for r in league.to_dict("records")
+                   if not r["bridged"]][:12] if not league.empty else [],
     }
 
     k = report.kpis(snapshot, history, spread, (a, b))
@@ -249,7 +287,10 @@ def build(root: Path = ROOT,
         "notes": notes_path.read_text(encoding="utf-8") if notes_path.exists() else None,
         "token": {"snapshot": snapshot.to_dict("records") if not snapshot.empty else [], "pair": (a, b), "kpis": k,
                   "oz_last": float(ounces.iloc[-1]) if len(ounces) else None,
-                  "oz_m1": macro.pct_change_ago(ounces, 30) if len(ounces) else None},
+                  "oz_m1": macro.pct_change_ago(ounces, 30) if len(ounces) else None,
+                  "league": league.to_dict("records") if not league.empty else [], "league_sum": league_sum,
+                  "flows": flows, "venues": venue_sum, "venue_top": venue_top, "defi": defi_top,
+                  "defi_stats": defi_stats, "risk": risk, "gold_indep": gold_indep},
         "status": status, "payload": payload,
     }
 
@@ -265,6 +306,12 @@ def build(root: Path = ROOT,
         pd.DataFrame(fred).sort_index().to_csv(data / "macro.csv", index_label="date")
     for key, df in cot.items():
         df.to_csv(data / f"cot_{key}.csv", index_label="date")
+    if not league.empty:
+        league.drop(columns=["bridged"]).to_csv(data / "token_league.csv", index=False)
+    for name, rows in (("token_flows", flows), ("token_venues", venue_sum), ("token_defi_pools", defi_top),
+                       ("token_risk", risk)):
+        if rows:
+            pd.DataFrame(rows).to_csv(data / f"{name}.csv", index=False)
     sc_out = {"date": updated, "score": sc["score"], "factors_used": sc["n"], "stance": sc["stance"],
               "factors": [{"key": f["key"], "signal": f["signal"], "reading": f["reading"], "asof": f["asof"]}
                           for f in sc["factors"]]}

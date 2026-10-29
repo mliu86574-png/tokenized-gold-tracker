@@ -3,9 +3,15 @@
     {"symbol": "XAUT", "name": "Tether Gold",      "coingecko_id": "tether-gold",     "defillama_name": "Tether Gold"},
     {"symbol": "PAXG", "name": "PAX Gold",         "coingecko_id": "pax-gold",        "defillama_name": "Paxos Gold"},
     {"symbol": "XAUm", "name": "Matrixdock Gold",  "coingecko_id": "matrixdock-gold", "defillama_name": "Matrixdock Gold"},
-    {"symbol": "KAU",  "name": "Kinesis Gold",     "coingecko_id": "kinesis-gold",    "defillama_name": "Kinesis Money"}
+    {"symbol": "KAU",  "name": "Kinesis Gold",     "coingecko_id": "kinesis-gold",    "defillama_name": "Kinesis Money", "unit": "g"}
   ],
   "history_days": 365,
+  "category": "tokenized-gold",
+  "min_mcap_usd": 1000000,
+  "exclude_from_totals": {
+    "tether-gold-tokens": "XAU₮0 is the omnichain (LayerZero OFT) version of XAU₮, backed by XAU₮ locked on Ethereum; counted once, under XAU₮."
+  },
+  "defi_symbols": ["XAUT", "XAUT0", "PAXG", "XAUM", "KAU"],
   "spread_pair": ["XAUT", "PAXG"],
 
   "markets": [
