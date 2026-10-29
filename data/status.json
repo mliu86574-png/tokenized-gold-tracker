@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-29 03:19",
+  "updated": "2026-10-29 03:33",
   "sources": [
     {
       "source": "CoinGecko",
@@ -16,6 +16,48 @@
     {
       "source": "DefiLlama",
       "item": "protocols",
+      "ok": true,
+      "last": null
+    },
+    {
+      "source": "CoinGecko",
+      "item": "category tokenized-gold",
+      "ok": true,
+      "last": null
+    },
+    {
+      "source": "DefiLlama",
+      "item": "yield pools",
+      "ok": true,
+      "last": null
+    },
+    {
+      "source": "DefiLlama",
+      "item": "lend/borrow",
+      "ok": true,
+      "last": null
+    },
+    {
+      "source": "CoinGecko",
+      "item": "tickers XAUT",
+      "ok": true,
+      "last": null
+    },
+    {
+      "source": "CoinGecko",
+      "item": "tickers PAXG",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "CoinGecko",
+      "item": "tickers XAUm",
+      "ok": false,
+      "last": null
+    },
+    {
+      "source": "CoinGecko",
+      "item": "tickers KAU",
       "ok": true,
       "last": null
     },
