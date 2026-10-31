@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-30 02:14",
+  "updated": "2026-10-31 02:12",
   "sources": [
     {
       "source": "CoinGecko",
@@ -11,7 +11,7 @@
       "source": "CoinGecko",
       "item": "history",
       "ok": true,
-      "last": "2026-10-30"
+      "last": "2026-10-31"
     },
     {
       "source": "DefiLlama",
@@ -65,169 +65,169 @@
       "source": "GLD (Nasdaq) rescaled to XAUT per-ounce price (x10.859)",
       "item": "GC=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy SLV (Nasdaq)",
       "item": "SI=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy PPLT (Nasdaq)",
       "item": "PL=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy PALL (Nasdaq)",
       "item": "PA=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy CPER (Nasdaq)",
       "item": "HG=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy USO (Nasdaq)",
       "item": "CL=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy BNO (Nasdaq)",
       "item": "BZ=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy UNG (Nasdaq)",
       "item": "NG=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy WEAT (Nasdaq)",
       "item": "ZW=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy CORN (Nasdaq)",
       "item": "ZC=F",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy GSG (Nasdaq)",
       "item": "^SPGSCI",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ECB reference rates (ICE formula)",
       "item": "DX-Y.NYB",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ECB reference rates",
       "item": "EURUSD=X",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ECB reference rates",
       "item": "JPY=X",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ECB reference rates",
       "item": "GBPUSD=X",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ECB reference rates",
       "item": "AUDUSD=X",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ECB reference rates",
       "item": "CHF=X",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ECB reference rates",
       "item": "CNY=X",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ECB reference rates",
       "item": "HKD=X",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "ETF proxy SPY (Nasdaq)",
       "item": "^GSPC",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "CoinGecko",
       "item": "BTC-USD",
       "ok": true,
-      "last": "2026-10-30"
+      "last": "2026-10-31"
     },
     {
       "source": "US Treasury",
       "item": "DFII10",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "US Treasury",
       "item": "DGS10",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "US Treasury",
       "item": "DGS2",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "US Treasury (nominal \u2212 TIPS)",
       "item": "T10YIE",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "US Treasury",
       "item": "T10Y2Y",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "New York Fed",
       "item": "DFEDTARU",
       "ok": true,
-      "last": "2026-10-28"
+      "last": "2026-10-29"
     },
     {
       "source": "New York Fed",
       "item": "SOFR",
       "ok": true,
-      "last": "2026-10-28"
+      "last": "2026-10-29"
     },
     {
       "source": "FRED",
@@ -239,7 +239,7 @@
       "source": "Cboe",
       "item": "VIXCLS",
       "ok": true,
-      "last": "2026-10-29"
+      "last": "2026-10-30"
     },
     {
       "source": "FRED",
@@ -287,19 +287,19 @@
       "source": "CFTC",
       "item": "COT Gold",
       "ok": true,
-      "last": "2026-10-20"
+      "last": "2026-10-27"
     },
     {
       "source": "CFTC",
       "item": "COT Silver",
       "ok": true,
-      "last": "2026-10-20"
+      "last": "2026-10-27"
     },
     {
       "source": "CFTC",
       "item": "COT Copper",
       "ok": true,
-      "last": "2026-10-20"
+      "last": "2026-10-27"
     }
   ]
 }
