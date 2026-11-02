@@ -27,12 +27,12 @@ A daily, fully automated dashboard that puts gold in its macro context: a transp
 
 | Token | Market cap | Share | Price (USD) | 24h volume | 30d price change |
 |---|---:|---:|---:|---:|---:|
-| XAUT (Tether Gold) | $3.14bn | 59.3% | 3,876.56 | $25.69bn | -6.81% |
-| PAXG (PAX Gold) | $1.74bn | 32.9% | 3,898.83 | $48.62m | -6.43% |
-| KAU (Kinesis Gold) | $346.67m | 6.6% | 126.56 | $0.01m | -6.26% |
-| XAUm (Matrixdock Gold) | $67.42m | 1.3% | 3,883.81 | $0.54m | -6.48% |
+| XAUT (Tether Gold) | $3.16bn | 59.4% | 3,904.34 | $66.84bn | -5.87% |
+| PAXG (PAX Gold) | $1.75bn | 32.9% | 3,919.26 | $62.42m | -5.61% |
+| KAU (Kinesis Gold) | $344.90m | 6.5% | 125.92 | $0.17m | -5.38% |
+| XAUm (Matrixdock Gold) | $67.83m | 1.3% | 3,907.54 | $0.52m | -5.58% |
 
-_Last updated 2026-11-01 02:17 (UTC). Source: CoinGecko, DefiLlama._
+_Last updated 2026-11-02 02:21 (UTC). Source: CoinGecko, DefiLlama._
 <!-- SNAPSHOT:END -->
 
 ## What the page shows
