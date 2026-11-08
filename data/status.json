@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-07 02:13",
+  "updated": "2026-11-08 02:20",
   "sources": [
     {
       "source": "CoinGecko",
@@ -11,7 +11,7 @@
       "source": "CoinGecko",
       "item": "history",
       "ok": true,
-      "last": "2026-11-07"
+      "last": "2026-11-08"
     },
     {
       "source": "DefiLlama",
@@ -179,13 +179,13 @@
       "source": "ETF proxy SPY (Nasdaq)",
       "item": "^GSPC",
       "ok": true,
-      "last": "2026-11-05"
+      "last": "2026-11-06"
     },
     {
       "source": "CoinGecko",
       "item": "BTC-USD",
       "ok": true,
-      "last": "2026-11-07"
+      "last": "2026-11-08"
     },
     {
       "source": "US Treasury",
@@ -239,7 +239,7 @@
       "source": "Cboe",
       "item": "VIXCLS",
       "ok": true,
-      "last": "2026-11-05"
+      "last": "2026-11-06"
     },
     {
       "source": "FRED",
