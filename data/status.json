@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11 02:17",
+  "updated": "2026-11-12 02:25",
   "sources": [
     {
       "source": "CoinGecko",
@@ -11,7 +11,7 @@
       "source": "CoinGecko",
       "item": "history",
       "ok": true,
-      "last": "2026-11-11"
+      "last": "2026-11-12"
     },
     {
       "source": "DefiLlama",
@@ -131,49 +131,49 @@
       "source": "ECB reference rates (ICE formula)",
       "item": "DX-Y.NYB",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-11"
     },
     {
       "source": "ECB reference rates",
       "item": "EURUSD=X",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-11"
     },
     {
       "source": "ECB reference rates",
       "item": "JPY=X",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-11"
     },
     {
       "source": "ECB reference rates",
       "item": "GBPUSD=X",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-11"
     },
     {
       "source": "ECB reference rates",
       "item": "AUDUSD=X",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-11"
     },
     {
       "source": "ECB reference rates",
       "item": "CHF=X",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-11"
     },
     {
       "source": "ECB reference rates",
       "item": "CNY=X",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-11"
     },
     {
       "source": "ECB reference rates",
       "item": "HKD=X",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-11"
     },
     {
       "source": "Yahoo Finance",
@@ -185,7 +185,7 @@
       "source": "CoinGecko",
       "item": "BTC-USD",
       "ok": true,
-      "last": "2026-11-11"
+      "last": "2026-11-12"
     },
     {
       "source": "US Treasury",
@@ -239,7 +239,7 @@
       "source": "Cboe",
       "item": "VIXCLS",
       "ok": true,
-      "last": "2026-11-09"
+      "last": "2026-11-11"
     },
     {
       "source": "FRED",
@@ -305,7 +305,7 @@
       "source": "CoinGecko (fallback)",
       "item": "gold price via XAUT",
       "ok": true,
-      "last": "2026-11-11"
+      "last": "2026-11-12"
     }
   ]
 }
