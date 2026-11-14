@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13 02:20",
+  "updated": "2026-11-14 02:19",
   "sources": [
     {
       "source": "CoinGecko",
@@ -11,7 +11,7 @@
       "source": "CoinGecko",
       "item": "history",
       "ok": true,
-      "last": "2026-11-13"
+      "last": "2026-11-14"
     },
     {
       "source": "DefiLlama",
@@ -62,7 +62,7 @@
       "last": null
     },
     {
-      "source": "GLD (Nasdaq) rescaled to XAUT per-ounce price (x10.863)",
+      "source": "GLD (Nasdaq) rescaled to XAUT per-ounce price (x10.862)",
       "item": "GC=F",
       "ok": true,
       "last": "2026-11-12"
@@ -77,13 +77,13 @@
       "source": "ETF proxy PPLT (Nasdaq)",
       "item": "PL=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy PALL (Nasdaq)",
       "item": "PA=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy CPER (Nasdaq)",
@@ -101,79 +101,79 @@
       "source": "ETF proxy BNO (Nasdaq)",
       "item": "BZ=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy UNG (Nasdaq)",
       "item": "NG=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy WEAT (Nasdaq)",
       "item": "ZW=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy CORN (Nasdaq)",
       "item": "ZC=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy GSG (Nasdaq)",
       "item": "^SPGSCI",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ECB reference rates (ICE formula)",
       "item": "DX-Y.NYB",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ECB reference rates",
       "item": "EURUSD=X",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ECB reference rates",
       "item": "JPY=X",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ECB reference rates",
       "item": "GBPUSD=X",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ECB reference rates",
       "item": "AUDUSD=X",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ECB reference rates",
       "item": "CHF=X",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ECB reference rates",
       "item": "CNY=X",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ECB reference rates",
       "item": "HKD=X",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy SPY (Nasdaq)",
@@ -185,49 +185,49 @@
       "source": "CoinGecko",
       "item": "BTC-USD",
       "ok": true,
-      "last": "2026-11-13"
+      "last": "2026-11-14"
     },
     {
       "source": "US Treasury",
       "item": "DFII10",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "US Treasury",
       "item": "DGS10",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "US Treasury",
       "item": "DGS2",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "US Treasury (nominal \u2212 TIPS)",
       "item": "T10YIE",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "US Treasury",
       "item": "T10Y2Y",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "New York Fed",
       "item": "DFEDTARU",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-12"
     },
     {
       "source": "New York Fed",
       "item": "SOFR",
       "ok": true,
-      "last": "2026-11-10"
+      "last": "2026-11-12"
     },
     {
       "source": "FRED",
