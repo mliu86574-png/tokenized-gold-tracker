@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-14 02:19",
+  "updated": "2026-11-15 02:22",
   "sources": [
     {
       "source": "CoinGecko",
@@ -11,7 +11,7 @@
       "source": "CoinGecko",
       "item": "history",
       "ok": true,
-      "last": "2026-11-14"
+      "last": "2026-11-15"
     },
     {
       "source": "DefiLlama",
@@ -62,16 +62,16 @@
       "last": null
     },
     {
-      "source": "GLD (Nasdaq) rescaled to XAUT per-ounce price (x10.862)",
+      "source": "GLD (Nasdaq) rescaled to XAUT per-ounce price (x10.863)",
       "item": "GC=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy SLV (Nasdaq)",
       "item": "SI=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy PPLT (Nasdaq)",
@@ -89,13 +89,13 @@
       "source": "ETF proxy CPER (Nasdaq)",
       "item": "HG=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy USO (Nasdaq)",
       "item": "CL=F",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "ETF proxy BNO (Nasdaq)",
@@ -179,13 +179,13 @@
       "source": "ETF proxy SPY (Nasdaq)",
       "item": "^GSPC",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "CoinGecko",
       "item": "BTC-USD",
       "ok": true,
-      "last": "2026-11-14"
+      "last": "2026-11-15"
     },
     {
       "source": "US Treasury",
@@ -239,7 +239,7 @@
       "source": "Cboe",
       "item": "VIXCLS",
       "ok": true,
-      "last": "2026-11-12"
+      "last": "2026-11-13"
     },
     {
       "source": "FRED",
