@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-21 02:24",
+  "updated": "2026-11-22 02:25",
   "sources": [
     {
       "source": "CoinGecko",
@@ -11,7 +11,7 @@
       "source": "CoinGecko",
       "item": "history",
       "ok": true,
-      "last": "2026-11-21"
+      "last": "2026-11-22"
     },
     {
       "source": "DefiLlama",
@@ -185,7 +185,7 @@
       "source": "CoinGecko",
       "item": "BTC-USD",
       "ok": true,
-      "last": "2026-11-21"
+      "last": "2026-11-22"
     },
     {
       "source": "US Treasury",
