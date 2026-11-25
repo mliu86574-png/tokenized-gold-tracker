@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-24 11:05",
-  "score": -4,
+  "date": "2026-11-25 09:59",
+  "score": -3,
   "factors_used": 8,
   "stance": "cautious",
   "factors": [
@@ -8,25 +8,25 @@
       "key": "real_yield",
       "signal": -1.0,
       "reading": 12.99999999999999,
-      "asof": "2026-11-23"
+      "asof": "2026-11-24"
     },
     {
       "key": "usd",
       "signal": -1.0,
-      "reading": 2.246372031563215,
-      "asof": "2026-11-23"
+      "reading": 2.046863216806094,
+      "asof": "2026-11-24"
     },
     {
       "key": "policy",
       "signal": 0.0,
       "reading": -6.00000000000005,
-      "asof": "2026-11-23"
+      "asof": "2026-11-24"
     },
     {
       "key": "inflation",
       "signal": -1.0,
-      "reading": -20.999999999999996,
-      "asof": "2026-11-23"
+      "reading": -21.999999999999975,
+      "asof": "2026-11-24"
     },
     {
       "key": "risk",
@@ -37,26 +37,26 @@
     {
       "key": "trend",
       "signal": -1.0,
-      "reading": -17.82069626860506,
-      "asof": "2026-11-23"
+      "reading": -19.548204271175827,
+      "asof": "2026-11-24"
     },
     {
       "key": "stretch",
-      "signal": 0.0,
-      "reading": 32.902710811063756,
-      "asof": "2026-11-23"
+      "signal": 1.0,
+      "reading": 29.994479314512816,
+      "asof": "2026-11-24"
     },
     {
       "key": "positioning",
       "signal": 0.0,
       "reading": 25.0,
-      "asof": "2026-11-23"
+      "asof": "2026-11-24"
     },
     {
       "key": "onchain",
       "signal": 0.0,
-      "reading": 0.2587578339021013,
-      "asof": "2026-11-23"
+      "reading": 0.26094700784689007,
+      "asof": "2026-11-24"
     }
   ]
 }
