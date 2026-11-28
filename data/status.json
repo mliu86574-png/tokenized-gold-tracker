@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-27 09:48",
+  "updated": "2026-11-28 09:01",
   "sources": [
     {
       "source": "CoinGecko",
@@ -11,7 +11,7 @@
       "source": "CoinGecko",
       "item": "history",
       "ok": true,
-      "last": "2026-11-27"
+      "last": "2026-11-28"
     },
     {
       "source": "DefiLlama",
@@ -62,7 +62,7 @@
       "last": null
     },
     {
-      "source": "GLD (Nasdaq) rescaled to XAUT per-ounce price (x10.867)",
+      "source": "GLD (Nasdaq) rescaled to XAUT per-ounce price (x10.869)",
       "item": "GC=F",
       "ok": true,
       "last": "2026-11-25"
@@ -131,49 +131,49 @@
       "source": "ECB reference rates (ICE formula)",
       "item": "DX-Y.NYB",
       "ok": true,
-      "last": "2026-11-26"
+      "last": "2026-11-27"
     },
     {
       "source": "ECB reference rates",
       "item": "EURUSD=X",
       "ok": true,
-      "last": "2026-11-26"
+      "last": "2026-11-27"
     },
     {
       "source": "ECB reference rates",
       "item": "JPY=X",
       "ok": true,
-      "last": "2026-11-26"
+      "last": "2026-11-27"
     },
     {
       "source": "ECB reference rates",
       "item": "GBPUSD=X",
       "ok": true,
-      "last": "2026-11-26"
+      "last": "2026-11-27"
     },
     {
       "source": "ECB reference rates",
       "item": "AUDUSD=X",
       "ok": true,
-      "last": "2026-11-26"
+      "last": "2026-11-27"
     },
     {
       "source": "ECB reference rates",
       "item": "CHF=X",
       "ok": true,
-      "last": "2026-11-26"
+      "last": "2026-11-27"
     },
     {
       "source": "ECB reference rates",
       "item": "CNY=X",
       "ok": true,
-      "last": "2026-11-26"
+      "last": "2026-11-27"
     },
     {
       "source": "ECB reference rates",
       "item": "HKD=X",
       "ok": true,
-      "last": "2026-11-26"
+      "last": "2026-11-27"
     },
     {
       "source": "ETF proxy SPY (Nasdaq)",
@@ -185,49 +185,49 @@
       "source": "CoinGecko",
       "item": "BTC-USD",
       "ok": true,
-      "last": "2026-11-27"
+      "last": "2026-11-28"
     },
     {
       "source": "US Treasury",
       "item": "DFII10",
       "ok": true,
-      "last": "2026-11-25"
+      "last": "2026-11-27"
     },
     {
       "source": "US Treasury",
       "item": "DGS10",
       "ok": true,
-      "last": "2026-11-25"
+      "last": "2026-11-27"
     },
     {
       "source": "US Treasury",
       "item": "DGS2",
       "ok": true,
-      "last": "2026-11-25"
+      "last": "2026-11-27"
     },
     {
       "source": "US Treasury (nominal \u2212 TIPS)",
       "item": "T10YIE",
       "ok": true,
-      "last": "2026-11-25"
+      "last": "2026-11-27"
     },
     {
       "source": "US Treasury",
       "item": "T10Y2Y",
       "ok": true,
-      "last": "2026-11-25"
+      "last": "2026-11-27"
     },
     {
       "source": "New York Fed",
       "item": "DFEDTARU",
       "ok": true,
-      "last": "2026-11-24"
+      "last": "2026-11-25"
     },
     {
       "source": "New York Fed",
       "item": "SOFR",
       "ok": true,
-      "last": "2026-11-24"
+      "last": "2026-11-25"
     },
     {
       "source": "FRED",
@@ -239,7 +239,7 @@
       "source": "Cboe",
       "item": "VIXCLS",
       "ok": true,
-      "last": "2026-11-25"
+      "last": "2026-11-27"
     },
     {
       "source": "FRED",
